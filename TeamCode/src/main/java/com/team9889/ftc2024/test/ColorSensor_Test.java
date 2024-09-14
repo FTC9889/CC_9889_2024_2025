@@ -1,0 +1,36 @@
+package com.team9889.ftc2024.test;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.team9889.ftc2024.subsystems.Robot;
+
+@Autonomous
+@Disabled
+public class ColorSensor_Test extends LinearOpMode {
+
+    Robot mRobot = new Robot();
+
+//    ColorSensor color;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        mRobot.init(hardwareMap);
+
+//        color = hardwareMap.get(ColorSensor.class, "Color");
+
+        waitForStart();
+
+
+        while (opModeIsActive()) {
+//            telemetry.addData("Red", mRobot.mIntake.color.red());
+//            telemetry.addData("Green", mRobot.mIntake.color.green());
+//            telemetry.addData("Blue", mRobot.mIntake.color.blue());
+            telemetry.update();
+
+
+        }
+
+    }
+}

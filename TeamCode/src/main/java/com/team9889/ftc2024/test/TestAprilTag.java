@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.team9889.ftc2024.subsystems.Robot;
-import com.team9889.ftc2024.subsystems.Robot.BackDrop;
+//import com.team9889.ftc2024.subsystems.Robot.BackDrop;
 
 @Autonomous
 @Disabled
@@ -14,18 +14,18 @@ public class TestAprilTag extends LinearOpMode {
     Robot mRobot = new Robot();
 
 
-    BackDrop side;
+//    BackDrop side;
 
     public void runOpMode() throws InterruptedException {
 
-        mRobot.init(hardwareMap);
+//        mRobot.init(hardwareMap);
 //        mRobot.init_camera(hardwareMap, telemetry, false);
-        mRobot.mLift.initPosition();
-        mRobot.mLift.set_Grabber_Open(false, false);
-        mRobot.mIntake.vfbUp();
-        mRobot.mIntake.closeGate();
-
-        side = BackDrop.CENTER;
+//        mRobot.mLift.initPosition();
+//        mRobot.mLift.set_Grabber_Open(false, false);
+//        mRobot.mIntake.vfbUp();
+//        mRobot.mIntake.closeGate();
+//
+//        side = BackDrop.CENTER;
 //        mRobot.stop_team_prop_scanner();
         sleep(100);
 //        mRobot.mBackdrop.initAprilTag(hardwareMap);

@@ -17,8 +17,11 @@ public class TeleOp extends LinearOpMode {
     Robot mRobot = new Robot();
     @Override
     public void runOpMode() throws InterruptedException {
-        mRobot.mDrive.setPower(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x * 0.85);
+        mRobot.init(hardwareMap);
 
+        waitForStart();
+
+        mRobot.mDrive.setPower(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x * 0.85);
 
     }
 //
@@ -95,11 +98,9 @@ public class TeleOp extends LinearOpMode {
 //          }
 //      }
 //  }
-//    @Override
-//    public void runOpMode() throws InterruptedException {
-//        mRobot.init(hardwareMap);
-//        waitForStart();
-//
+
+
+
 //        mRobot.mDrone.do_nothing();
 
 //        IntakeState requestedIntakeState = IntakeState.NULL;

@@ -5,7 +5,6 @@ package com.team9889.ftc2024.opmode;
 //import static com.team9889.ftc2024.opmode.TeleOp.IntakeState.SLIGHT_EXTEND;
 //import static com.team9889.ftc2024.opmode.TeleOp.IntakeState.TRANSFER_FIRST_POSITION;
 //import static com.team9889.ftc2024.opmode.TeleOp.IntakeState.TRANSFER_SECOND_POSITION;
-//
 //import com.acmerobotics.dashboard.FtcDashboard;
 //import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -20,12 +19,11 @@ public class TeleOp extends LinearOpMode {
         mRobot.init(hardwareMap);
 
         waitForStart();
-
-        mRobot.mDrive.setPower(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x * 0.85);
-
+        while(opModeIsActive()) {
+            mRobot.mDrive.setPower(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x * 0.85);
+        }
     }
 //
-//    Robot mRobot=new Robot();
 //
 //  enum IntakeState {
 //      INTAKE,

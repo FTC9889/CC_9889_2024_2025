@@ -20,6 +20,10 @@ public class Robot {
 //    public DriveAuto aDrive;
 
     public Drive mDrive = new Drive();
+    public Arm mArm = new Arm();
+    public Hanger mHanger = new Hanger();
+
+
 
 //    public Intake mIntake = new Intake();
 //    public ScoringLift mLift = new ScoringLift();
@@ -61,8 +65,11 @@ public class Robot {
 
     public void init(HardwareMap hardwareMap) {
         mDrive.init(hardwareMap);
+        mArm.init(hardwareMap);
+        mHanger.init(hardwareMap);
 
     }
+
 
 //    @Deprecated
 //    public double ticks_per_inch = 1.0 / ((((96.0/25.4) * Math.PI) * ((((double) 18) / ((double) 15)))) / 537.7);

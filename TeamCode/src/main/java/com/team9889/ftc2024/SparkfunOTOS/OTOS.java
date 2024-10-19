@@ -45,7 +45,8 @@ public class OTOS extends LinearOpMode {
                 myOtos.calibrateImu();
             }
 
-            mRobot.mDrive.setPower(gamepad1.right_stick_x,gamepad1.right_stick_y, gamepad1.left_stick_y);
+            mRobot.mDrive.setPower(-gamepad1.left_stick_y / 2, gamepad1.left_stick_x/ 2, -gamepad1.right_stick_x/ 2);
+
 
 
             // Inform user of available controls
@@ -88,7 +89,7 @@ public class OTOS extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(-2.503, 2.478, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(2.5, 2.25, 0);
         myOtos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for
@@ -107,8 +108,8 @@ public class OTOS extends LinearOpMode {
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setLinearScalar(1.009);
-        myOtos.setAngularScalar(0.996);
+        myOtos.setLinearScalar(1.098571098);
+        myOtos.setAngularScalar(1);
 
         // The IMU on the OTOS includes a gyroscope and accelerometer, which could
         // have an offset. Note that as of firmware version 1.0, the calibration

@@ -3,12 +3,14 @@ package com.team9889.ftc2024.opmode.NewAutonomus.Yellow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2024.subsystems.Robot;
 
 @Autonomous
 public class JustParkPush extends LinearOpMode {
 
     Robot mRobot = new Robot();
+    ElapsedTime autoTimer = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -38,7 +40,7 @@ public class JustParkPush extends LinearOpMode {
         waitForStart();
 
 //        mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x);
-
+//
 
         if (opModeIsActive()){
 
@@ -83,8 +85,15 @@ public class JustParkPush extends LinearOpMode {
             mRobot.mArm.arm.setPower(1);
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            mRobot.mDrive.setPower(-0.5, 0, 0);
-            sleep(3500);
+
+
+            autoTimer.reset();
+            while (opModeIsActive() && autoTimer.milliseconds() < 3500){
+                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
             mRobot.mDrive.brake();
         }
 

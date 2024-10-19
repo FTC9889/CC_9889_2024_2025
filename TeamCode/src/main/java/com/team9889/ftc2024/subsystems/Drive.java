@@ -58,48 +58,48 @@ public RevIMU imu;
 
     }
 
-
-    public void backward(double setPower){
-        rightFront.setPower(setPower);
-        leftFront.setPower(setPower);
-        rightBack.setPower(setPower);
-        leftBack.setPower(setPower);
-    }
-
-    public void forward(double setPower){
-        rightFront.setPower(-setPower);
-        leftFront.setPower(setPower);
-        rightBack.setPower(-setPower);
-        leftBack.setPower(setPower);
-    }
-
-    public void turnLeft(double setPower){
-        rightFront.setPower(setPower);
-        leftFront.setPower(-setPower);
-        rightBack.setPower(setPower);
-        leftBack.setPower(-setPower);
-    }
-
-    public void turnRight(double setPower){
-        rightFront.setPower(-setPower);
-        leftFront.setPower(setPower);
-        rightBack.setPower(-setPower);
-        leftBack.setPower(setPower);
-    }
-
-    public void strafeLeft(double setPower){
-        rightFront.setPower(setPower);
-        leftFront.setPower(-setPower);
-        rightBack.setPower(-setPower);
-        leftBack.setPower(setPower);
-    }
-
-    public void strafeRight(double setPower){
-        rightFront.setPower(-setPower);
-        leftFront.setPower(setPower);
-        rightBack.setPower(setPower);
-        leftBack.setPower(-setPower);
-    }
+//
+//    public void backward(double setPower){
+//        rightFront.setPower(setPower);
+//        leftFront.setPower(setPower);
+//        rightBack.setPower(setPower);
+//        leftBack.setPower(setPower);
+//    }
+//
+//    public void forward(double setPower){
+//        rightFront.setPower(-setPower);
+//        leftFront.setPower(setPower);
+//        rightBack.setPower(-setPower);
+//        leftBack.setPower(setPower);
+//    }
+//
+//    public void turnLeft(double setPower){
+//        rightFront.setPower(setPower);
+//        leftFront.setPower(-setPower);
+//        rightBack.setPower(setPower);
+//        leftBack.setPower(-setPower);
+//    }
+//
+//    public void turnRight(double setPower){
+//        rightFront.setPower(-setPower);
+//        leftFront.setPower(setPower);
+//        rightBack.setPower(-setPower);
+//        leftBack.setPower(setPower);
+//    }
+//
+//    public void strafeLeft(double setPower){
+//        rightFront.setPower(setPower);
+//        leftFront.setPower(-setPower);
+//        rightBack.setPower(-setPower);
+//        leftBack.setPower(setPower);
+//    }
+//
+//    public void strafeRight(double setPower){
+//        rightFront.setPower(-setPower);
+//        leftFront.setPower(setPower);
+//        rightBack.setPower(setPower);
+//        leftBack.setPower(-setPower);
+//    }
 
 
 

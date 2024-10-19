@@ -32,196 +32,196 @@ public class Cycles extends LinearOpMode {
 
         while (opModeIsActive()){
 
-            //First Sample
-            mRobot.mDrive.backward( 0.5);
-            sleep(400);
-            mRobot.mDrive.brake();
-
-            //Score
-            mRobot.mArm.setArmRotation(0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-            sleep(1000);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(400);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-            mRobot.mArm.setArmRotation(-0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-            mRobot.mDrive.forward(0.5);
-            sleep(tile);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.turnLeft(0.5);
-            sleep(turn);
-            mRobot.mDrive.brake();
-
-
-
-
-
-            // Second Sample // First Cycle
-            //Move
-            mRobot.mDrive.forward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.turnLeft(0.5);
-            sleep(turn);
-            mRobot.mDrive.brake();
-
-
-
-            //Intake
-            mRobot.mArm.setExtetion(0.2);
-            sleep(500);
-
-            mRobot.mArm.setClawPosition(closedClaw);
-            sleep(500);
-
-            mRobot.mArm.setExtetion(0);
-            sleep(500);
-
-
-            // Move
-            mRobot.mDrive.turnRight(0.5);
-            sleep(600);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.backward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-
-            //Score
-            mRobot.mArm.setArmRotation(0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(400);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-            mRobot.mArm.setArmRotation(-0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-
-            //Third Sample // Second Cycle
-            //Move
-            mRobot.mDrive.forward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.turnRight(-0.5);
-            sleep(600);
-            mRobot.mDrive.brake();
-
-
-            //Intake
-            mRobot.mArm.setExtetion(0.3);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(closedClaw);
-            sleep(500);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-
-            // Move
-            mRobot.mDrive.turnRight(0.5);
-            sleep(600);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.backward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-
-            //Score
-            mRobot.mArm.setArmRotation(0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(400);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-            mRobot.mArm.setArmRotation(-0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-
-
-            //Fourth Sample // Third Cycle
-            //Move
-            mRobot.mDrive.forward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.turnRight(-0.5);
-            sleep(600);
-            mRobot.mDrive.brake();
-
-
-            //Intake
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(closedClaw);
-            sleep(500);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-
-            // Move
-            mRobot.mDrive.turnRight(0.5);
-            sleep(600);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.backward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-
-            //Score
-            mRobot.mArm.setArmRotation(0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(750);
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(400);
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(750);
-
-            mRobot.mArm.setArmRotation(-0.5);
-            sleep(800);
-            mRobot.mArm.setArmRotation(0);
-
+//            //First Sample
+//            mRobot.mDrive.backward( 0.5);
+//            sleep(400);
+//            mRobot.mDrive.brake();
+//
+//            //Score
+//            mRobot.mArm.setArmRotation(0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//            sleep(1000);
+//
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(openClaw);
+//            sleep(400);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//            mRobot.mArm.setArmRotation(-0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//            mRobot.mDrive.forward(0.5);
+//            sleep(tile);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.turnLeft(0.5);
+//            sleep(turn);
+//            mRobot.mDrive.brake();
+//
+//
+//
+//
+//
+//            // Second Sample // First Cycle
+//            //Move
+//            mRobot.mDrive.forward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.turnLeft(0.5);
+//            sleep(turn);
+//            mRobot.mDrive.brake();
+//
+//
+//
+//            //Intake
+//            mRobot.mArm.setExtetion(0.2);
+//            sleep(500);
+//
+//            mRobot.mArm.setClawPosition(closedClaw);
+//            sleep(500);
+//
+//            mRobot.mArm.setExtetion(0);
+//            sleep(500);
+//
+//
+//            // Move
+//            mRobot.mDrive.turnRight(0.5);
+//            sleep(600);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.backward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//
+//            //Score
+//            mRobot.mArm.setArmRotation(0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(openClaw);
+//            sleep(400);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//            mRobot.mArm.setArmRotation(-0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//
+//            //Third Sample // Second Cycle
+//            //Move
+//            mRobot.mDrive.forward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.turnRight(-0.5);
+//            sleep(600);
+//            mRobot.mDrive.brake();
+//
+//
+//            //Intake
+//            mRobot.mArm.setExtetion(0.3);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(closedClaw);
+//            sleep(500);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//
+//            // Move
+//            mRobot.mDrive.turnRight(0.5);
+//            sleep(600);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.backward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//
+//            //Score
+//            mRobot.mArm.setArmRotation(0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(openClaw);
+//            sleep(400);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//            mRobot.mArm.setArmRotation(-0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//
+//
+//            //Fourth Sample // Third Cycle
+//            //Move
+//            mRobot.mDrive.forward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.turnRight(-0.5);
+//            sleep(600);
+//            mRobot.mDrive.brake();
+//
+//
+//            //Intake
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(closedClaw);
+//            sleep(500);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//
+//            // Move
+//            mRobot.mDrive.turnRight(0.5);
+//            sleep(600);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mDrive.backward(0.5);
+//            sleep(1200);
+//            mRobot.mDrive.brake();
+//
+//
+//            //Score
+//            mRobot.mArm.setArmRotation(0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(750);
+//
+//            mRobot.mArm.setClawPosition(openClaw);
+//            sleep(400);
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(750);
+//
+//            mRobot.mArm.setArmRotation(-0.5);
+//            sleep(800);
+//            mRobot.mArm.setArmRotation(0);
+//
 
 
 

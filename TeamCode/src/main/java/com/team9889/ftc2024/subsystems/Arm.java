@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 public class Arm {
     public DcMotor arm;
-    public Servo  claw ,rotate, extend;
+    public Servo  rotate, extend, claw;
 //    CRServo claw2;
 //    intake2, intake2Right, intake2Left;
     CRServo intake3;
@@ -45,9 +45,9 @@ public class Arm {
 
     }
 
-    public void setIntake3Power(double power){
-        intake3.setPower(power);
-    }
+//    public void setIntake3Power(double power){
+//        intake3.setPower(power);
+//    }
 
 
 
@@ -55,7 +55,7 @@ public class Arm {
     public void setExtetion(double Extendo){
         extend.setPosition(Extendo);
     }
-
+//
 //    public void setClawPosition(double clawPos){
 //        claw2.setPower(clawPos);
 //    }

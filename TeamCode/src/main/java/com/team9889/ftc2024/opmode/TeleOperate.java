@@ -42,6 +42,7 @@ public class TeleOperate extends LinearOpMode{
 
 
 
+
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
 
@@ -50,7 +51,7 @@ public class TeleOperate extends LinearOpMode{
             double rightPower = drive - turn;
 
             // Send calculated power to wheels
-            mRobot.mDrive.setPower(gamepad1.right_stick_x, gamepad1.left_stick_y);
+            mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x);
 
 
 
@@ -135,6 +136,14 @@ public class TeleOperate extends LinearOpMode{
                 mRobot.mArm.setClawPosition(0);
             }
 
+            if (gamepad2.b){
+                mRobot.mArm.setIntake3Power(1);
+            } else if (gamepad2.a) {
+                mRobot.mArm.setIntake3Power(-1);
+            }else {
+                mRobot.mArm.setIntake3Power(0);
+            }
+
 
             if (gamepad2.dpad_up) {
                 mRobot.mHanger.setHangPower(1);
@@ -180,6 +189,21 @@ public class TeleOperate extends LinearOpMode{
             if (elapseTimer.milliseconds() > 500 && press){
                 newTarget = 150;
                 press = false;
+            }
+
+            //test
+
+            if (gamepad2.dpad_up){
+                mRobot.mDrive.forward(1);
+            }
+            if (gamepad2.dpad_down){
+                mRobot.mDrive.backward(1);
+            }
+            if (gamepad2.dpad_right){
+                mRobot.mDrive.strafeRight(1);
+            }
+            if (gamepad2.dpad_left){
+                mRobot.mDrive.strafeLeft(1);
             }
 
 

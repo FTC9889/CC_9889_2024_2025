@@ -45,7 +45,7 @@ public class OTOS extends LinearOpMode {
                 myOtos.calibrateImu();
             }
 
-            mRobot.mDrive.setPower(gamepad1.right_stick_x, gamepad1.left_stick_y);
+            mRobot.mDrive.setPower(gamepad1.right_stick_x,gamepad1.right_stick_y, gamepad1.left_stick_y);
 
 
             // Inform user of available controls

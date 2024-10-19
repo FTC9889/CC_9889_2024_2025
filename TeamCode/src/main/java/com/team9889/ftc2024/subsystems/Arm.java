@@ -12,6 +12,7 @@ public class Arm {
     public Servo  claw ,rotate, extend;
 //    CRServo claw2;
 //    intake2, intake2Right, intake2Left;
+    CRServo intake3;
 
 
 
@@ -25,6 +26,7 @@ public class Arm {
         claw = hardwareMap.servo.get("claw");
 
 //        intake2 = hardwareMap.crservo.get("intake2");
+        intake3 = hardwareMap.crservo.get("intake3");
 //
 //        intake2Left = hardwareMap.crservo.get("intake2Left");
 //        intake2Right = hardwareMap.crservo.get("intake2Right");
@@ -41,6 +43,10 @@ public class Arm {
         arm.setPower(armPower);
 
 
+    }
+
+    public void setIntake3Power(double power){
+        intake3.setPower(power);
     }
 
 

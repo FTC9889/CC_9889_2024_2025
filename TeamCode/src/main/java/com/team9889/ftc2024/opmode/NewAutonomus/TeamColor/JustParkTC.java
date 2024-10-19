@@ -2,6 +2,7 @@ package com.team9889.ftc2024.opmode.NewAutonomus.TeamColor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.team9889.ftc2024.subsystems.Robot;
 @Autonomous
 public class JustParkTC extends LinearOpMode {
@@ -21,10 +22,20 @@ public class JustParkTC extends LinearOpMode {
         double minExtention = 0.024;
 
 
+        mRobot.mArm.setClawPosition(closedClaw);
+
+        mRobot.mArm.setExtetion(minExtention);
+
+        mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        mRobot.mArm.arm.setTargetPosition(500);
+        mRobot.mArm.arm.setPower(0.2);
+        mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
         waitForStart();
 
 
-        while (opModeIsActive()) {
+        if (opModeIsActive()) {
             mRobot.mArm.setExtetion(maxExtension);
             sleep(1000);
 
@@ -34,28 +45,9 @@ public class JustParkTC extends LinearOpMode {
             mRobot.mArm.setExtetion(minExtention);
             sleep(1000);
 
-            mRobot.mDrive.backward(0.5);
+            mRobot.mDrive.setPower(0.5, 0, 0);
             sleep(750);
             mRobot.mDrive.brake();
-
-            mRobot.mDrive.turnRight(0.5);
-            sleep(turn);
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.forward(0.5);
-            sleep(1200);
-            mRobot.mDrive.brake();
-
-            mRobot.mArm.setArmRotation(0.2);
-            sleep(1000);
-            mRobot.mArm.setArmRotation(0);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(500);
-
-            mRobot.mArm.setArmRotation(-0.2);
-            sleep(1000);
-            mRobot.mArm.setArmRotation(0);
         }
 
     }

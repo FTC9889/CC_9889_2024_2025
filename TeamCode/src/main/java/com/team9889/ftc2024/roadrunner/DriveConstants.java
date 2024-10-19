@@ -1,5 +1,6 @@
 package com.team9889.ftc2024.roadrunner;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 /*
@@ -15,7 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  * These are not the only parameters; some are located in the localizer classes, drive base classes,
  * and op modes themselves.
  */
-
+@Disabled
 public class DriveConstants {
 
     /*

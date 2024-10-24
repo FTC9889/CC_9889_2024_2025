@@ -39,7 +39,11 @@ public class TeleOperate extends LinearOpMode{
 
         waitForStart();
 
+        ElapsedTime Timer = new ElapsedTime();
+
         while (opModeIsActive()) {
+
+
 
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
@@ -49,7 +53,7 @@ public class TeleOperate extends LinearOpMode{
             double rightPower = drive - turn;
 
             // Send calculated power to wheels
-            mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x / 0.66);
+            mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x / 2);
 
 
             if (gamepad2.left_bumper){
@@ -71,27 +75,93 @@ public class TeleOperate extends LinearOpMode{
 //            }
 
 
-            if(gamepad1.right_trigger > 0.5) {
-                mRobot.mArm.arm.setPower(1);
-                newTarget += 5;
-            } else if(gamepad1.left_trigger > 0.5) {
-                if (touchSensor.isPressed() == true) {
-                    mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            if (Timer.milliseconds() > 2000){
+                if(gamepad1.right_trigger > 0.5) {
+                    mRobot.mArm.arm.setPower(1);
+                    newTarget += 5;
+                } else if(gamepad1.left_trigger > 0.5) {
+                    if (touchSensor.isPressed() == true) {
+                        mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        newTarget = 0;
+                    } else {
+                        mRobot.mArm.arm.setPower(1);
+                        newTarget -= 5;
+                    }
+                }
+
+
+                newTarget = Math.min(newTarget, 938);
+                mRobot.mArm.arm.setTargetPosition(newTarget);
+                mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                if (gamepad2.x){
+                    servoPosition = 0.2;
+                    press = true;
+                }
+
+                if (elapseTimer.milliseconds() > 700 && press){
                     newTarget = 0;
+                    mRobot.mArm.arm.setPower(0.3);
+                    press = false;
+                }
+
+
+//            if (gamepad2.x) {
+//                mRobot.mArm.setIntake2Power(1);
+//            }else {
+//                mRobot.mArm.setIntake2Power(0);
+//            }
+
+                if (gamepad1.y){
+                    newTarget = 870;
+                    servoPosition = 0.525;
+                    rotationPress = true;
+                    mRobot.mArm.arm.setPower(1);
+                }
+
+                if (elapseTimer.milliseconds() > 500 && rotationPress){
+                    servoPosition = 0.525;
+                }
+
+
+                if (gamepad2.y ){
+                    mRobot.mArm.setRotation(0.35);
+                    press = true;
+                    servoPosition = (0.024);
+                    rotationPress = false;
+                    //newTarget = 0;
+                }
+
+
+
+
+                if (elapseTimer.milliseconds() > 700 && press){
+                    newTarget = 150;
+                    mRobot.mArm.arm.setPower(0.3);
+                    press = false;
                 } else {
                     mRobot.mArm.arm.setPower(1);
-                    newTarget -= 5;
+                }
+            } else {
+                if (Timer.milliseconds() < 400){
+                    mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    mRobot.mArm.arm.setPower(0.5);
+                } else if (Timer.milliseconds() < 2000 && touchSensor.isPressed() != true) {
+                    mRobot.mArm.arm.setPower(-0.05);
+                } else {
+                    mRobot.mArm.arm.setPower(0);
+                    mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    newTarget = 0;
                 }
             }
 
-            newTarget = Math.min(newTarget, 938);
+
+
 
             //938
 
 
 
-            mRobot.mArm.arm.setTargetPosition(newTarget);
-            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // max 0.575
             // min 0.024
@@ -146,43 +216,6 @@ public class TeleOperate extends LinearOpMode{
                 mRobot.mHanger.setHangPower(0);
             }
 
-
-//            if (gamepad2.x) {
-//                mRobot.mArm.setIntake2Power(1);
-//            }else {
-//                mRobot.mArm.setIntake2Power(0);
-//            }
-
-            if (gamepad1.y){
-                newTarget = 870;
-                servoPosition = 0.525;
-                rotationPress = true;
-                mRobot.mArm.arm.setPower(1);
-            }
-
-            if (elapseTimer.milliseconds() > 500 && rotationPress){
-                servoPosition = 0.525;
-            }
-
-
-            if (gamepad2.y ){
-                mRobot.mArm.setRotation(0.35);
-                press = true;
-                servoPosition = (0.024);
-                rotationPress = false;
-                //newTarget = 0;
-            }
-
-
-
-
-            if (elapseTimer.milliseconds() > 700 && press){
-                newTarget = 150;
-                mRobot.mArm.arm.setPower(0.3);
-                press = false;
-            } else {
-                mRobot.mArm.arm.setPower(1);
-            }
 
             //test
 

@@ -24,6 +24,7 @@ public RevIMU imu;
 
         imu = new RevIMU("imu", hardwareMap);
 
+
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2024.subsystems.Robot;
 
 @Autonomous
-public class JustParkPush extends LinearOpMode {
+public class BasketSide extends LinearOpMode {
 
     Robot mRobot = new Robot();
     ElapsedTime autoTimer = new ElapsedTime();
@@ -54,12 +54,22 @@ public class JustParkPush extends LinearOpMode {
             mRobot.mArm.setExtetion(maxExtension);
             sleep(2000);
 
-            mRobot.mDrive.setPower(0.5, 0, 0);
-            sleep(600);
+            autoTimer.reset();
+            while (opModeIsActive() && autoTimer.milliseconds() < 600){
+                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
             mRobot.mDrive.brake();
 
-            mRobot.mDrive.setPower(0, 0, 0.5);
-            sleep(150);
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 20) > 5){
+                double AnglePower = - 3 * (mRobot.mDrive.imu.getNormalHeading() - 20) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
             mRobot.mDrive.brake();
             sleep(500);
 
@@ -70,12 +80,22 @@ public class JustParkPush extends LinearOpMode {
             sleep(1000);
             mRobot.mArm.setRotation(0.35);
 
-            mRobot.mDrive.setPower(0, 0, -0.5);
-            sleep(90);
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading()) > 5){
+                double AnglePower = - 3 * (mRobot.mDrive.imu.getNormalHeading()) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
             mRobot.mDrive.brake();
 
-            mRobot.mDrive.setPower(-0.5, 0, 0);
-            sleep(1200);
+            autoTimer.reset();
+            while (opModeIsActive() && autoTimer.milliseconds() < 1200){
+                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
             mRobot.mDrive.brake();
 
             mRobot.mArm.setExtetion(minExtention);
@@ -95,6 +115,10 @@ public class JustParkPush extends LinearOpMode {
                 telemetry.update();
             }
             mRobot.mDrive.brake();
+
+            mRobot.mArm.setArmRotation(0.5);
+            sleep(100);
+            mRobot.mArm.setArmRotation(0);
         }
 
     }

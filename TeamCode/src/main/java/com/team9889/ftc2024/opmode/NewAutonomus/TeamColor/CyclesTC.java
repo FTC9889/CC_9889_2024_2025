@@ -1,9 +1,10 @@
 package com.team9889.ftc2024.opmode.NewAutonomus.TeamColor;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.team9889.ftc2024.subsystems.Robot;
-
+@Disabled
 @Autonomous
 public class CyclesTC extends LinearOpMode {// STOPSHIP: 10/28/2023 }
     Robot mRobot = new Robot();

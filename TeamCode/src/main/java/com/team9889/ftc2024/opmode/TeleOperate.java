@@ -27,6 +27,7 @@ public class TeleOperate extends LinearOpMode{
     boolean rotationPress = false;
 
 
+
     double servoPosition = 0.024;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -120,9 +121,11 @@ public class TeleOperate extends LinearOpMode{
 
             if (gamepad1.left_bumper) {
                 mRobot.mArm.setClawPosition(0.67);
+
             }
             if (gamepad1.right_bumper) {
                 mRobot.mArm.setClawPosition(0.36);
+
             }
 
 //            if (gamepad1.left_bumper){
@@ -162,7 +165,7 @@ public class TeleOperate extends LinearOpMode{
             }
 
 
-            if (gamepad2.y){
+            if (gamepad2.y ){
                 mRobot.mArm.setRotation(0.35);
                 press = true;
                 servoPosition = (0.024);
@@ -173,9 +176,9 @@ public class TeleOperate extends LinearOpMode{
 
 
 
-            if (elapseTimer.milliseconds() > 500 && press){
+            if (elapseTimer.milliseconds() > 700 && press){
                 newTarget = 150;
-                mRobot.mArm.arm.setPower(0.5);
+                mRobot.mArm.arm.setPower(0.3);
                 press = false;
             } else {
                 mRobot.mArm.arm.setPower(1);
@@ -200,7 +203,7 @@ public class TeleOperate extends LinearOpMode{
             if (touchSensor.isPressed() == true) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
             }
-            telemetry.addData("clawPosistion", mRobot.mArm.claw.getPosition());+
+            telemetry.addData("clawPosistion", mRobot.mArm.claw.getPosition());
             telemetry.addData("position", mRobot.mArm.arm.getCurrentPosition());
             telemetry.addData("target postion", mRobot.mArm.arm.getTargetPosition());
             telemetry.addData("current extension", mRobot.mArm.extend.getPosition());

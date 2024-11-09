@@ -10,7 +10,8 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class Arm {
     public DcMotor arm;
     public Servo  rotate, extend, claw;
-//    CRServo claw2;
+    CRServo intake2Right, intake2Left;
+//    claw2;
 //    intake2, intake2Right, intake2Left;
     CRServo intake3;
 
@@ -26,10 +27,10 @@ public class Arm {
         claw = hardwareMap.servo.get("claw");
 
 //        intake2 = hardwareMap.crservo.get("intake2");
-        intake3 = hardwareMap.crservo.get("intake3");
+//        intake3 = hardwareMap.crservo.get("intake3");
 //
-//        intake2Left = hardwareMap.crservo.get("intake2Left");
-//        intake2Right = hardwareMap.crservo.get("intake2Right");
+        intake2Left = hardwareMap.crservo.get("intake2Left");
+        intake2Right = hardwareMap.crservo.get("intake2Right");
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
@@ -73,10 +74,10 @@ public class Arm {
 //    }
 //
 //
-//    public void setIntake2Power(double intake2Power){
-//        intake2Right.setPower(intake2Power);
-//        intake2Left.setPower(intake2Power);
-//    }
+    public void setIntake2Power(double intake2Power){
+        intake2Right.setPower(intake2Power);
+        intake2Left.setPower(-intake2Power);
+    }
 //
 //
 

@@ -25,6 +25,7 @@ public class TeleOperate extends LinearOpMode{
     ElapsedTime elapseTimer = new ElapsedTime();
     boolean press = false;
     boolean rotationPress = false;
+    boolean reset = false;
 
 
 
@@ -75,7 +76,7 @@ public class TeleOperate extends LinearOpMode{
 //            }
 
 
-            if (Timer.milliseconds() > 2000){
+            if (Timer.milliseconds() > 2000 || reset){
                 if(gamepad1.right_trigger > 0.5) {
                     mRobot.mArm.arm.setPower(1);
                     newTarget += 5;
@@ -88,6 +89,8 @@ public class TeleOperate extends LinearOpMode{
                         newTarget -= 5;
                     }
                 }
+
+
 
 
                 newTarget = Math.min(newTarget, 938);
@@ -151,7 +154,12 @@ public class TeleOperate extends LinearOpMode{
                 } else {
                     mRobot.mArm.arm.setPower(0);
                     mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    newTarget = 0;
+                    mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    mRobot.mArm.arm.setPower(1);
+                    mRobot.mArm.arm.setTargetPosition(150);
+                    newTarget = 150;
+                    reset = true;
+
                 }
             }
 

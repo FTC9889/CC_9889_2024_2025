@@ -59,14 +59,14 @@ public class HumanPlayer extends LinearOpMode {
             sleep(8000);
 
             autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 52) > 5) {
-                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) /180;
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 55) > 5) {
+                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 55) /180;
                 mRobot.mDrive.setPower(0, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.update();
             }
 
-            mRobot.mArm.arm.setTargetPosition(850);
+            mRobot.mArm.arm.setTargetPosition(890);
             mRobot.mArm.arm.setPower(1);
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(500);
@@ -75,8 +75,8 @@ public class HumanPlayer extends LinearOpMode {
             sleep(1000);
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 900) {
-                double AnglePower = -1.3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+            while (opModeIsActive() && autoTimer.milliseconds() < 1300) {
+                double AnglePower = -1.3 * (mRobot.mDrive.imu.getNormalHeading() - 55) / 180;
                 mRobot.mDrive.setPower(0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.update();
@@ -91,8 +91,8 @@ public class HumanPlayer extends LinearOpMode {
             mRobot.mArm.setRotation(0.35);
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 900) {
-                double AnglePower = -1.3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+            while (opModeIsActive() && autoTimer.milliseconds() < 1300) {
+                double AnglePower = -1.3 * (mRobot.mDrive.imu.getNormalHeading() - 55) / 180;
                 mRobot.mDrive.setPower(-0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.update();
@@ -134,7 +134,7 @@ public class HumanPlayer extends LinearOpMode {
             mRobot.mDrive.brake();
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 1100) {
+            while (opModeIsActive() && autoTimer.milliseconds() < 1600) {
                 double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
                 mRobot.mDrive.setPower(-0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);

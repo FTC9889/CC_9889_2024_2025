@@ -46,7 +46,7 @@ public class BasketSide extends LinearOpMode {
 
 
 
-            mRobot.mArm.arm.setTargetPosition(850);
+            mRobot.mArm.arm.setTargetPosition(890);
             mRobot.mArm.arm.setPower(1);
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(1000);
@@ -55,7 +55,7 @@ public class BasketSide extends LinearOpMode {
             sleep(2000);
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 600){
+            while (opModeIsActive() && autoTimer.milliseconds() < 700){
                 double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
                 mRobot.mDrive.setPower(0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
@@ -108,7 +108,7 @@ public class BasketSide extends LinearOpMode {
 
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 3500){
+            while (opModeIsActive() && autoTimer.milliseconds() < 3900){
                 double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
                 mRobot.mDrive.setPower(-0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);

@@ -8,23 +8,24 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 public class Arm {
-    public DcMotor arm;
-    public Servo  rotate, extend, claw;
+    public DcMotor arm, extend;
+    public Servo  rotate, claw;
     CRServo intake2Right, intake2Left;
 //    claw2;
 //    intake2, intake2Right, intake2Left;
     CRServo intake3;
 
-
+// hehehehe
 
 
     public void init(HardwareMap hardwareMap){
         arm = hardwareMap.dcMotor.get("arm");
 
         rotate = hardwareMap.servo.get("rotate");
-        extend = hardwareMap.servo.get("extend");
 //        claw2 = hardwareMap.crservo.get("claw2");
         claw = hardwareMap.servo.get("claw");
+
+        extend = hardwareMap.dcMotor.get("extend");
 
 //        intake2 = hardwareMap.crservo.get("intake2");
 //        intake3 = hardwareMap.crservo.get("intake3");
@@ -32,14 +33,12 @@ public class Arm {
         intake2Left = hardwareMap.crservo.get("intake2Left");
         intake2Right = hardwareMap.crservo.get("intake2Right");
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
-
-
-
-
-
     }
+
+    public void setExtencfdfdsionPower(double power){
+        extend.setPower(power);
+    }
+
     public void setArmRotation(double armPower){
         arm.setPower(armPower);
 
@@ -51,15 +50,9 @@ public class Arm {
 //    }
 
 
+// teehee
 
 
-    public void setExtetion(double Extendo){
-        extend.setPosition(Extendo);
-    }
-//
-//    public void setClawPosition(double clawPos){
-//        claw2.setPower(clawPos);
-//    }
 
     public void setClawPosition(double Claw){
         claw.setPosition(Claw);
@@ -78,11 +71,12 @@ public class Arm {
         intake2Right.setPower(intake2Power);
         intake2Left.setPower(-intake2Power);
     }
+
 //
 //
 
 
-
+// *chuckles
 
 
 }

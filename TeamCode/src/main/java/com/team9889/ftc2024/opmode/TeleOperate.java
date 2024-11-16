@@ -37,6 +37,7 @@ public class TeleOperate extends LinearOpMode{
         mRobot.init(hardwareMap);
 
         int newTarget = mRobot.mArm.arm.getCurrentPosition();
+        int ExtensionTarget = mRobot.mArm.extend.getCurrentPosition();
 
         waitForStart();
 
@@ -164,6 +165,19 @@ public class TeleOperate extends LinearOpMode{
             }
 
 
+//            ExtensionTarget = Math.min(ExtensionTarget, 938);
+            mRobot.mArm.extend.setTargetPosition(ExtensionTarget);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            if (gamepad1.dpad_up){
+                ExtensionTarget += 5;
+            }
+
+            if (gamepad1.dpad_down){
+                ExtensionTarget -= 5;
+            }
+
+
 
 
             //938
@@ -171,22 +185,8 @@ public class TeleOperate extends LinearOpMode{
 
 
 
-            // max 0.575
-            // min 0.024
 
-            if (gamepad1.dpad_up) {
-                servoPosition += 0.006;
-            }else if (gamepad1.dpad_down) {
-                servoPosition -= 0.006;
-            }
 
-            servoPosition = Math.max(0.024, Math.min(servoPosition, 0.575));
-
-            mRobot.mArm.setExtetion(servoPosition);
-
-            if (gamepad1.y){
-                servoPosition += 0.01;
-            }
 
             if (gamepad1.x){
                 mRobot.mArm.setRotation(0.35);
@@ -225,29 +225,17 @@ public class TeleOperate extends LinearOpMode{
             }
 
 
-            //test
 
-//            if (gamepad2.dpad_up){
-//                mRobot.mDrive.forward(1);
-//            }
-//            if (gamepad2.dpad_down){
-//                mRobot.mDrive.backward(1);
-//            }
-//            if (gamepad2.dpad_right){
-//                mRobot.mDrive.strafeRight(1);
-//            }
-//            if (gamepad2.dpad_left){
-//                mRobot.mDrive.strafeLeft(1);
-//            }
 
 
             if (touchSensor.isPressed() == true) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
             }
             telemetry.addData("clawPosistion", mRobot.mArm.claw.getPosition());
+
             telemetry.addData("position", mRobot.mArm.arm.getCurrentPosition());
-            telemetry.addData("target postion", mRobot.mArm.arm.getTargetPosition());
-            telemetry.addData("current extension", mRobot.mArm.extend.getPosition());
+
+            telemetry.addData("target extension postion", mRobot.mArm.extend.getTargetPosition());
             telemetry.update();
 
 

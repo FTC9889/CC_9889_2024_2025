@@ -109,14 +109,20 @@ public RevIMU imu;
     }
 
     public int front_encoder(){
-        return leftFront.getCurrentPosition();
+        return -rightFront.getCurrentPosition();
 
     }
     public void reset_encoder(){
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
     public void brake(){
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE );
@@ -125,6 +131,13 @@ public RevIMU imu;
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE );
 
         setPower(0,0,  0);
+    }
+
+    public void floatTheMotors(){
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 }
 

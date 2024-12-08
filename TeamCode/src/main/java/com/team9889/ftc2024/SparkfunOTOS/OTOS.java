@@ -108,7 +108,7 @@ public class OTOS extends LinearOpMode {
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setLinearScalar(1.098571098);
+        myOtos.setLinearScalar(1);
         myOtos.setAngularScalar(1);
 
         // The IMU on the OTOS includes a gyroscope and accelerometer, which could

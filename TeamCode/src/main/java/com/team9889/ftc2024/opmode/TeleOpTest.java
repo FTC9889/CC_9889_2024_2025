@@ -35,13 +35,13 @@ public class TeleOpTest extends LinearOpMode {
 
         while (opModeIsActive()){
 
-            if (gamepad2.x){
-                mRobot.mArm.setIntake2Power(1);
-            } else if (gamepad2.b) {
-                mRobot.mArm.setIntake2Power(-1);
-            }else {
-                mRobot.mArm.setIntake2Power(0);
-            }
+//            if (gamepad2.x){
+//                mRobot.mArm.setIntake2Power(1);
+//            } else if (gamepad2.b) {
+//                mRobot.mArm.setIntake2Power(-1);
+//            }else {
+//                mRobot.mArm.setIntake2Power(0);
+//            }
         }
     }
 }

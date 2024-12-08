@@ -28,97 +28,388 @@ public class BasketSide extends LinearOpMode {
 
         mRobot.mArm.setClawPosition(closedClaw);
 
-        mRobot.mArm.setExtetion(minExtention);
+
 
         mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         mRobot.mArm.arm.setTargetPosition(700);
         mRobot.mArm.arm.setPower(0.2);
         mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
+        mRobot.mArm.extend.setTargetPosition(0);
+        mRobot.mArm.extend.setPower(1);
+        mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(1000);
 
         waitForStart();
 
 //        mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x);
 //
 
-        if (opModeIsActive()){
+        if (opModeIsActive()) {
 
 
-
-            mRobot.mArm.arm.setTargetPosition(890);
+            // first sample
+            //driving
+            mRobot.mArm.arm.setTargetPosition(975);
             mRobot.mArm.arm.setPower(1);
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            sleep(1000);
+//            sleep(500);
 
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(2000);
+            mRobot.mArm.extend.setTargetPosition(1250);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 330) {
+                double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+            mRobot.mDrive.reset_encoder();
 
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 700){
-                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
-                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 20) > 5) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 20) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+
+            //scoring
+
+            mRobot.mArm.setClawPosition(openClaw);
+            sleep(500);
+
+            mRobot.mArm.setRotation(0.33);
+            sleep(250);
+
+
+            // second sample
+            //driving
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading()) > 5) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading()) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+            mRobot.mDrive.reset_encoder();
+
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -600) {
+                double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.update();
             }
             mRobot.mDrive.brake();
 
+            mRobot.mArm.setRotation(0);
+
+
+            //reset arm
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+            mRobot.mArm.arm.setTargetPosition(0);
+            mRobot.mArm.arm.setPower(1);
+            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+
+            //driving
+            mRobot.mDrive.reset_encoder();
             autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 20) > 5){
-                double AnglePower = - 3 * (mRobot.mDrive.imu.getNormalHeading() - 20) / 180;
-                mRobot.mDrive.setPower(0, 0, AnglePower);
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -1700) {
+                double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(0, 0.5, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.front_encoder()) > 3)
+                mRobot.mDrive.reset_encoder();
+
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 100) {
+                double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+
+            //intaking
+            mRobot.mArm.setClawPosition(closedClaw);
+            sleep(1000);
+
+            mRobot.mArm.arm.setTargetPosition(975);
+            mRobot.mArm.arm.setPower(0.5);
+            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            //driving
+
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 52) > 5) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
                 telemetry.update();
             }
             mRobot.mDrive.brake();
             sleep(500);
 
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(3000);
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 1275) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
 
-            mRobot.mArm.setRotation(1);
-            sleep(1000);
-            mRobot.mArm.setRotation(0.35);
+
+            //scoring
+            mRobot.mArm.extend.setTargetPosition(1250);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(750);
+
+            mRobot.mArm.setClawPosition(openClaw);
+            sleep(500);
+
+            mRobot.mArm.setRotation(0.33);
+            sleep(250);
+
+
+            //thrid sample
+            //driving
+            mRobot.mDrive.reset_encoder();
+
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -1300) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+
+            //reset arm
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+
+            mRobot.mArm.arm.setTargetPosition(110);
+            mRobot.mArm.arm.setPower(1);
+            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+            mRobot.mArm.setRotation(0);
+
+
+            mRobot.mDrive.reset_encoder();
 
             autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading()) > 5){
-                double AnglePower = - 3 * (mRobot.mDrive.imu.getNormalHeading()) / 180;
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading()) > 5) {
+                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading()) / 180;
                 mRobot.mDrive.setPower(0, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.update();
             }
             mRobot.mDrive.brake();
 
-            autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 1200){
-                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
-                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
-                telemetry.addData("AnglePower", AnglePower);
-                telemetry.update();
-            }
-            mRobot.mDrive.brake();
 
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(2000);
+            //intaking
+            mRobot.mArm.extend.setTargetPosition(355);
+            mRobot.mArm.extend.setPower(0.5);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
 
-            mRobot.mArm.arm.setTargetPosition(50);
+
+            mRobot.mArm.setClawPosition(closedClaw);
+            sleep(500);
+
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+            mRobot.mArm.arm.setTargetPosition(975);
             mRobot.mArm.arm.setPower(1);
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
-
+            //driving
+            mRobot.mDrive.reset_encoder();
             autoTimer.reset();
-            while (opModeIsActive() && autoTimer.milliseconds() < 3900){
-                double AnglePower = - 1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
-                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 52) > 5) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+            sleep(500);
+
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 1275) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
                 telemetry.update();
             }
             mRobot.mDrive.brake();
 
-            mRobot.mArm.setArmRotation(0.5);
-            sleep(100);
-            mRobot.mArm.setArmRotation(0);
+
+            //scoring
+            mRobot.mArm.extend.setTargetPosition(1250);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(750);
+
+
+            mRobot.mArm.setClawPosition(openClaw);
+            sleep(500);
+
+            mRobot.mArm.setRotation(0.33);
+
+            mRobot.mDrive.reset_encoder();
+
+
+            //4th sample
+            //driving
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -375) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+            mRobot.mArm.setRotation(0);
+
+            //reset arm
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+            mRobot.mArm.arm.setTargetPosition(75);
+            mRobot.mArm.arm.setPower(1);
+            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+
+            //turn
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() + 46.5) > 5) {
+                double AnglePower = -2 * (mRobot.mDrive.imu.getNormalHeading() + 46.5) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+            sleep(250);
+
+
+            //intake
+
+
+            mRobot.mArm.extend.setTargetPosition(550);
+            mRobot.mArm.extend.setPower(0.5);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(250);
+
+            mRobot.mArm.setClawPosition(closedClaw);
+            sleep(1000);
+
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(0.5);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            sleep(250);
+
+
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 52) > 5) {
+                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0, 0, AnglePower);
+                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+            mRobot.mDrive.reset_encoder();
+
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 375) {
+                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+                mRobot.mDrive.setPower(0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
+
+
+            mRobot.mArm.arm.setTargetPosition(975);
+            mRobot.mArm.arm.setPower(1);
+            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            sleep(500);
+
+            mRobot.mArm.extend.setTargetPosition(1300);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+
+            mRobot.mArm.setClawPosition(openClaw);
+            sleep(500);
+
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            mRobot.mArm.extend.setTargetPosition(0);
+            mRobot.mArm.extend.setPower(1);
+            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sleep(500);
+
+
+
+
         }
 
     }

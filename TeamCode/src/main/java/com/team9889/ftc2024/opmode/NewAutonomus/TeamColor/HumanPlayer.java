@@ -26,7 +26,7 @@ public class HumanPlayer extends LinearOpMode {
 
         mRobot.mArm.setClawPosition(closedClaw);
 
-        mRobot.mArm.setExtetion(minExtention);
+//        mRobot.mArm.setExtetion(minExtention);
 
         mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         mRobot.mArm.arm.setTargetPosition(700);
@@ -71,7 +71,7 @@ public class HumanPlayer extends LinearOpMode {
             mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(500);
 
-            mRobot.mArm.setExtetion(maxExtension);
+//            mRobot.mArm.setExtetion(maxExtension);
             sleep(1000);
 
             autoTimer.reset();
@@ -99,7 +99,7 @@ public class HumanPlayer extends LinearOpMode {
             }
             mRobot.mDrive.brake();
 
-            mRobot.mArm.setExtetion(minExtention);
+//            mRobot.mArm.setExtetion(minExtention);
             sleep(2000);
 
             mRobot.mArm.arm.setTargetPosition(50);

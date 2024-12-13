@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2024.subsystems.Robot;
 
 @Autonomous(preselectTeleOp = "TeleOperate")
-public class BasketSide extends LinearOpMode {
+public class BasketSide3SampleAndPark extends LinearOpMode {
 
     Robot mRobot = new Robot();
     ElapsedTime autoTimer = new ElapsedTime();
@@ -309,19 +309,6 @@ public class BasketSide extends LinearOpMode {
             mRobot.mDrive.reset_encoder();
 
 
-            //4th sample
-            //driving
-            autoTimer.reset();
-            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -375) {
-                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
-                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
-                telemetry.addData("AnglePower", AnglePower);
-                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
-                telemetry.update();
-            }
-            mRobot.mDrive.brake();
-
-            mRobot.mArm.setRotation(0);
 
             //reset arm
             mRobot.mArm.extend.setTargetPosition(0);
@@ -335,97 +322,16 @@ public class BasketSide extends LinearOpMode {
             sleep(500);
 
 
-            //turn
             mRobot.mDrive.reset_encoder();
             autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() + 46.5) > 5) {
-                double AnglePower = -2 * (mRobot.mDrive.imu.getNormalHeading() + 46.5) / 180;
-                mRobot.mDrive.setPower(0, 0, AnglePower);
-                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
-                telemetry.update();
-            }
-            mRobot.mDrive.brake();
-
-            sleep(250);
-
-
-            //intake
-
-
-            mRobot.mArm.extend.setTargetPosition(550);
-            mRobot.mArm.extend.setPower(0.5);
-            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            sleep(250);
-
-            mRobot.mArm.setClawPosition(closedClaw);
-            sleep(1000);
-
-            mRobot.mArm.extend.setTargetPosition(0);
-            mRobot.mArm.extend.setPower(0.5);
-            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            sleep(250);
-
-
-            mRobot.mDrive.reset_encoder();
-            autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() - 52) > 5) {
-                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
-                mRobot.mDrive.setPower(0, 0, AnglePower);
-                telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
-                telemetry.update();
-            }
-            mRobot.mDrive.brake();
-
-            mRobot.mDrive.reset_encoder();
-
-            autoTimer.reset();
-            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 375) {
-                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
-                mRobot.mDrive.setPower(0.5, 0, AnglePower);
-                telemetry.addData("AnglePower", AnglePower);
-                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
-                telemetry.update();
-            }
-            mRobot.mDrive.brake();
-
-
-            mRobot.mArm.arm.setTargetPosition(975);
-            mRobot.mArm.arm.setPower(1);
-            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            sleep(500);
-
-            mRobot.mArm.extend.setTargetPosition(1300);
-            mRobot.mArm.extend.setPower(1);
-            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            sleep(500);
-
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(500);
-
-            autoTimer.reset();
-            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -200) {
-                double AnglePower = -3 * (mRobot.mDrive.imu.getNormalHeading() - 52) / 180;
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > 7000) {
+                double AnglePower = -5 * (mRobot.mDrive.imu.getNormalHeading()) - 10 / 180;
                 mRobot.mDrive.setPower(-0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
                 telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
                 telemetry.update();
             }
             mRobot.mDrive.brake();
-
-            mRobot.mArm.extend.setTargetPosition(0);
-            mRobot.mArm.extend.setPower(1);
-            mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            mRobot.mArm.arm.setTargetPosition(0);
-            mRobot.mArm.arm.setPower(1);
-            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-
-
 
         }
 

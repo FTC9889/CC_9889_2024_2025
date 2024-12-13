@@ -28,6 +28,7 @@ public class TeleOperate extends LinearOpMode{
     boolean reset = false;
     boolean retractPress = false;
     boolean retractPress2 = false;
+    boolean resetArmPosition = false;
 
 
 
@@ -97,9 +98,11 @@ public class TeleOperate extends LinearOpMode{
                     }
                 }
 
-                newTarget = Math.min(newTarget, 1300);
-                mRobot.mArm.arm.setTargetPosition(newTarget);
-                mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                if (!resetArmPosition) {
+                    newTarget = Math.min(newTarget, 1300);
+                    mRobot.mArm.arm.setTargetPosition(newTarget);
+                    mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                }
 
                 if (gamepad2.x){
                    ExtensionTarget = 150;
@@ -140,7 +143,7 @@ public class TeleOperate extends LinearOpMode{
                 if (gamepad2.y && mRobot.mArm.arm.getCurrentPosition() <= 500){
                     mRobot.mArm.setRotation(0);
                     retractPress = true;
-                    newTarget = 300;
+                    newTarget = 200;
                     mRobot.mArm.arm.setPower(0.3);
                     rotationPress = false;
                     //newTarget = 0;
@@ -159,15 +162,29 @@ public class TeleOperate extends LinearOpMode{
                     ExtensionTarget = 0;
                     rotationPress = false;
                     //newTarget = 0;
+                    resetArmPosition = true;
                     elapseTimer.reset();
                 }
 
                 if (elapseTimer.milliseconds() > 700 && retractPress2){
-                    newTarget = 300;
-                    mRobot.mArm.arm.setPower(0.3);
+                    if (resetArmPosition){
+                        if (touchSensor.isPressed()) {
+                            mRobot.mArm.arm.setPower(0);
+                            mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                            resetArmPosition = false;
+                        } else {
+                            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                            mRobot.mArm.arm.setPower(0.3);
+                        }
+                    } else {
+                        newTarget = 150;
+                        mRobot.mArm.arm.setPower(0.3);
+                    }
+
                     retractPress2 = false;
                 } else {
                     mRobot.mArm.arm.setPower(1);
+                    resetArmPosition=false;
                 }
 
 
@@ -193,18 +210,29 @@ public class TeleOperate extends LinearOpMode{
                 }
             }
 
+            int limit = 1300 ;
+            if (mRobot.mArm.arm.getCurrentPosition() < 400)
+                limit = 780;
 
-            ExtensionTarget = Math.min(Math.max(-20, ExtensionTarget), 1300);
+            ExtensionTarget = Math.min(Math.max(-20, ExtensionTarget), limit);
             mRobot.mArm.extend.setPower(1);
             mRobot.mArm.extend.setTargetPosition(ExtensionTarget);
             mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             if (gamepad1.dpad_up){
                 ExtensionTarget += 20;
+
+                if (mRobot.mArm.extend.getCurrentPosition() < 400){
+                    newTarget+=4;
+                }
             }
 
             if (gamepad1.dpad_down){
                 ExtensionTarget -= 20;
+
+                if (mRobot.mArm.extend.getCurrentPosition() < 400){
+                    newTarget-=4;
+                }
             }
 
 //            if (gamepad2.right_trigger > gamepad2.left_trigger){
@@ -247,10 +275,10 @@ public class TeleOperate extends LinearOpMode{
 //                mRobot.mArm.setIntake3Power(0);
 //
 
-            if (gamepad2.dpad_up) {
+            if (gamepad2.dpad_up && mRobot.mHanger.hang.getCurrentPosition() < 10350) {
                 mRobot.mHanger.setHangPower(1);
             }
-            else if (gamepad2.dpad_down){
+            else if (gamepad2.dpad_down && mRobot.mHanger.hang.getCurrentPosition() > 0){
                 mRobot.mHanger.setHangPower(-1);
             }else{
                 mRobot.mHanger.setHangPower(0);
@@ -268,6 +296,9 @@ public class TeleOperate extends LinearOpMode{
             telemetry.addData("position", mRobot.mArm.arm.getCurrentPosition());
 
             telemetry.addData("target extension postion", mRobot.mArm.extend.getTargetPosition());
+
+            telemetry.addData("hanger position", mRobot.mHanger.hang.getCurrentPosition());
+            // -350  0   10350
 
             telemetry.addData("p", mRobot.mArm.extend.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION).p);
             telemetry.addData("i", mRobot.mArm.extend.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION).i);

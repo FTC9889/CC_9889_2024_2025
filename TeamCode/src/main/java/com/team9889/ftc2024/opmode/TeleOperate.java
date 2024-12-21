@@ -143,7 +143,7 @@ public class TeleOperate extends LinearOpMode{
                 if (gamepad2.y && mRobot.mArm.arm.getCurrentPosition() <= 500){
                     mRobot.mArm.setRotation(0);
                     retractPress = true;
-                    newTarget = 200;
+                    newTarget = 250;
                     mRobot.mArm.arm.setPower(0.3);
                     rotationPress = false;
                     //newTarget = 0;
@@ -177,7 +177,7 @@ public class TeleOperate extends LinearOpMode{
                             mRobot.mArm.arm.setPower(0.3);
                         }
                     } else {
-                        newTarget = 150;
+                        newTarget = 270;
                         mRobot.mArm.arm.setPower(0.3);
                     }
 
@@ -204,7 +204,7 @@ public class TeleOperate extends LinearOpMode{
                     mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     mRobot.mArm.arm.setPower(1);
                     mRobot.mArm.arm.setTargetPosition(150);
-                    newTarget = 150;
+                    newTarget = 270;
                     reset = true;
 
                 }

@@ -15,6 +15,7 @@ public class HumanPlayer extends LinearOpMode {
 
         mRobot.init(hardwareMap);
 
+        mRobot.mArm.extend.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         long tile = 830;
         long side_tile = 2300;

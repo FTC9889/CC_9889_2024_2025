@@ -28,7 +28,7 @@ public class BasketSide extends LinearOpMode {
 
         mRobot.mArm.setClawPosition(closedClaw);
 
-
+        mRobot.mArm.extend.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         mRobot.mArm.arm.setTargetPosition(650);
@@ -145,7 +145,7 @@ public class BasketSide extends LinearOpMode {
                 mRobot.mDrive.reset_encoder();
 
             autoTimer.reset();
-            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 100) {
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 150) {
                 double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
                 mRobot.mDrive.setPower(0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
@@ -251,7 +251,7 @@ public class BasketSide extends LinearOpMode {
 
 
             //intaking
-            mRobot.mArm.extend.setTargetPosition(355);
+            mRobot.mArm.extend.setTargetPosition(360);
             mRobot.mArm.extend.setPower(0.5);
             mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(500);
@@ -338,8 +338,8 @@ public class BasketSide extends LinearOpMode {
             //turn
             mRobot.mDrive.reset_encoder();
             autoTimer.reset();
-            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() + 46.5) > 5) {
-                double AnglePower = -2 * (mRobot.mDrive.imu.getNormalHeading() + 46.5) / 180;
+            while (opModeIsActive() && Math.abs(mRobot.mDrive.imu.getNormalHeading() + 47.5) > 5) {
+                double AnglePower = -2 * (mRobot.mDrive.imu.getNormalHeading() + 47.5) / 180;
                 mRobot.mDrive.setPower(0, 0, AnglePower);
                 telemetry.addData("AnglePower", mRobot.mDrive.imu.getNormalHeading());
                 telemetry.update();
@@ -352,7 +352,7 @@ public class BasketSide extends LinearOpMode {
             //intake
 
 
-            mRobot.mArm.extend.setTargetPosition(550);
+            mRobot.mArm.extend.setTargetPosition(555);
             mRobot.mArm.extend.setPower(0.5);
             mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(250);

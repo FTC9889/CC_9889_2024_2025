@@ -30,7 +30,6 @@ public class Arm {
 
         extend = (DcMotorEx) hardwareMap.get(DcMotor.class,"extend");
         extend.setPositionPIDFCoefficients(15);
-        extend.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extend.setTargetPosition(extend.getCurrentPosition());
         extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        extend.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, new PIDFCoefficients(15, 0.05, 0, 0));

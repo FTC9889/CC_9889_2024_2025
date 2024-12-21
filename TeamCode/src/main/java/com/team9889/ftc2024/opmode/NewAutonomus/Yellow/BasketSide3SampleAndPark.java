@@ -28,7 +28,7 @@ public class BasketSide3SampleAndPark extends LinearOpMode {
 
         mRobot.mArm.setClawPosition(closedClaw);
 
-
+        mRobot.mArm.extend.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         mRobot.mArm.arm.setTargetPosition(650);
@@ -145,7 +145,7 @@ public class BasketSide3SampleAndPark extends LinearOpMode {
                 mRobot.mDrive.reset_encoder();
 
             autoTimer.reset();
-            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 100) {
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() < 150) {
                 double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
                 mRobot.mDrive.setPower(0.5, 0, AnglePower);
                 telemetry.addData("AnglePower", AnglePower);
@@ -165,6 +165,16 @@ public class BasketSide3SampleAndPark extends LinearOpMode {
 
 
             //driving
+            mRobot.mDrive.reset_encoder();
+            autoTimer.reset();
+            while (opModeIsActive() && mRobot.mDrive.front_encoder() > -50) {
+                double AnglePower = -1.3 * mRobot.mDrive.imu.getNormalHeading() / 180;
+                mRobot.mDrive.setPower(-0.5, 0, AnglePower);
+                telemetry.addData("AnglePower", AnglePower);
+                telemetry.addData("Encoder", mRobot.mDrive.front_encoder());
+                telemetry.update();
+            }
+            mRobot.mDrive.brake();
 
             mRobot.mDrive.reset_encoder();
             autoTimer.reset();
@@ -251,7 +261,7 @@ public class BasketSide3SampleAndPark extends LinearOpMode {
 
 
             //intaking
-            mRobot.mArm.extend.setTargetPosition(355);
+            mRobot.mArm.extend.setTargetPosition(365);
             mRobot.mArm.extend.setPower(0.5);
             mRobot.mArm.extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             sleep(500);

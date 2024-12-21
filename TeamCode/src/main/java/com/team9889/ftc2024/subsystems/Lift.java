@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import java.security.PublicKey;
-
 public class Lift {
     public
     DcMotorEx liftMotorR, liftMotorL, liftMotor3;
@@ -29,16 +27,25 @@ public class Lift {
     private ClawStates RequestedClawState = ClawStates.NULL;
 
     public enum LiftState {
-        NULL,
-        INTAKE_POSITION,
-        DEFAULT_POSITION,
-        LOW_RUNG_POSITION,
-        HIGH_RUNG_POSITION,
-        LOW_BASKET_POSITION,
-        HIGH_BASKET_POSITION,
-        HUMAN_PLAYER_POSITION,
-        HANG_RETRACTED_POSITION,
-        HANG_DEPLOYED_POSITION;
+        NULL(0),
+        INTAKE_POSITION(0),
+        DEFAULT_POSITION(0),
+        LOW_RUNG_POSITION(200),
+        HIGH_RUNG_POSITION(700),
+        LOW_BASKET_POSITION(400),
+        HIGH_BASKET_POSITION(800),
+        HUMAN_PLAYER_POSITION(100),
+        HANG_RETRACTED_POSITION(0),
+        HANG_DEPLOYED_POSITION(2000);
+
+        private final double value;
+        private LiftState(double value) {
+            this.value = value;
+        }
+
+        public double getTargetPosition() {
+            return value;
+        }
 
         public String toString() {
             switch (this) {
@@ -69,12 +76,21 @@ public class Lift {
 
 
     public enum ElbowStates{
-        NULL,
-        INTAKE_POSITION,
-        HUMAN_PLAYER_POSITION,
-        RUNG_SCORE_POSITION,
-        BASKET_SCORE_POSITION,
-        DEFAULT_POSITION;
+        NULL(0),
+        INTAKE_POSITION(0.1),
+        HUMAN_PLAYER_POSITION(0.2),
+        RUNG_SCORE_POSITION(0.3),
+        BASKET_SCORE_POSITION(0.4),
+        DEFAULT_POSITION(0.5);
+
+        private final double value;
+        private ElbowStates(double value) {
+            this.value = value;
+        }
+
+        public double getTargetPosition() {
+            return value;
+        }
 
         public String toString() {
             switch (this) {
@@ -96,12 +112,22 @@ public class Lift {
     }
 
     public enum WristState{
-        NULL,
-        INTAKE_POSITION,
-        HUMAN_PLAYER_POSITION,
-        RUNG_SCORE_POSITION,
-        BASKET_SCORE_POSITION,
-        DEFAULT_POSITION;
+        NULL(0),
+        INTAKE_POSITION(0.1),
+        HUMAN_PLAYER_POSITION(0.2),
+        RUNG_SCORE_POSITION(0.3),
+        BASKET_SCORE_POSITION(0.4),
+        DEFAULT_POSITION(0.5);
+
+        private final double value;
+        private WristState(double value) {
+            this.value = value;
+        }
+
+        public double getTargetPosition() {
+            return value;
+        }
+
         public String toString() {
             switch (this) {
                 case   INTAKE_POSITION:
@@ -122,10 +148,19 @@ public class Lift {
     }
 
     public enum ClawStates{
-        CLOSED_POSITION,
-        OPEN_POSITION,
-        LOOSE_POSITION,
-        NULL;
+        CLOSED_POSITION(0.1),
+        OPEN_POSITION(0.2),
+        LOOSE_POSITION(0.3),
+        NULL(0);
+
+        private final double value;
+        private ClawStates(double value) {
+            this.value = value;
+        }
+
+        public double getTargetPosition() {
+            return value;
+        }
 
         public String toString() {
             switch (this) {

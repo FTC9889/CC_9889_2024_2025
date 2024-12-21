@@ -7,11 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.team9889.lib.hardware.RevIMU;
 
-public class Drive { DcMotor leftFront,leftBack, rightFront, rightBack;
-//init hardware
-public RevIMU imu;
-//    private double lfPower;
-//    private double rfPower;
+public class Drive {
+    DcMotor leftFront,leftBack, rightFront, rightBack;
+    public RevIMU imu;
 
     public void init(HardwareMap hardwareMap){
         leftFront=hardwareMap.dcMotor.get("leftfront");
@@ -58,59 +56,10 @@ public RevIMU imu;
 
     }
 
-//
-//    public void backward(double setPower){
-//        rightFront.setPower(setPower);
-//        leftFront.setPower(setPower);
-//        rightBack.setPower(setPower);
-//        leftBack.setPower(setPower);
-//    }
-//
-//    public void forward(double setPower){
-//        rightFront.setPower(-setPower);
-//        leftFront.setPower(setPower);
-//        rightBack.setPower(-setPower);
-//        leftBack.setPower(setPower);
-//    }
-//
-//    public void turnLeft(double setPower){
-//        rightFront.setPower(setPower);
-//        leftFront.setPower(-setPower);
-//        rightBack.setPower(setPower);
-//        leftBack.setPower(-setPower);
-//    }
-//
-//    public void turnRight(double setPower){
-//        rightFront.setPower(-setPower);
-//        leftFront.setPower(setPower);
-//        rightBack.setPower(-setPower);
-//        leftBack.setPower(setPower);
-//    }
-//
-//    public void strafeLeft(double setPower){
-//        rightFront.setPower(setPower);
-//        leftFront.setPower(-setPower);
-//        rightBack.setPower(-setPower);
-//        leftBack.setPower(setPower);
-//    }
-//
-//    public void strafeRight(double setPower){
-//        rightFront.setPower(-setPower);
-//        leftFront.setPower(setPower);
-//        rightBack.setPower(setPower);
-//        leftBack.setPower(-setPower);
-//    }
-
-
-
     public double get_angle(){
         return imu.getNormalHeading();
     }
 
-    public int front_encoder(){
-        return leftFront.getCurrentPosition();
-
-    }
     public void reset_encoder(){
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

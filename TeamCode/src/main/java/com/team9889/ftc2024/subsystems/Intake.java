@@ -23,16 +23,16 @@ public class Intake {
     DigitalChannel magnetSensor;
     ColorSensor colorSensor;
 
-    private IntakeState CurrentIntakeState = IntakeState.NULL;
-    private IntakeState RequestedIntakeState = IntakeState.NULL;
+    private final IntakeState CurrentIntakeState = IntakeState.NULL;
+    private final IntakeState RequestedIntakeState = IntakeState.NULL;
 
-    private WristState CurrentWristState = WristState.NULL;
-    private WristState RequstedWristState = WristState.NULL;
+    private final WristState CurrentWristState = WristState.NULL;
+    private final WristState RequstedWristState = WristState.NULL;
 
-    private PowerState CurrentPowerState = PowerState.NULL;
-    private PowerState RequstedPowerState = PowerState.NULL;
+    private final PowerState CurrentPowerState = PowerState.NULL;
+    private final PowerState RequstedPowerState = PowerState.NULL;
 
-    private SampleColor CurrentSampleColor = SampleColor.NULL;
+    private final SampleColor CurrentSampleColor = SampleColor.NULL;
 
     public enum IntakeState {
         INTAKE,

@@ -14,17 +14,17 @@ public class Lift {
     Servo elbowR, elbowL, wrist, claw, shift1, shift2;
     DigitalChannel magnetSensor;
 
-    private LiftState CurrentLiftState = LiftState.NULL;
-    private LiftState RequestedLiftState = LiftState.NULL;
+    private final LiftState CurrentLiftState = LiftState.NULL;
+    private final LiftState RequestedLiftState = LiftState.NULL;
 
-    private ElbowStates CurrentElbowState = ElbowStates.NULL;
-    private ElbowStates RequestedElbowState = ElbowStates.NULL;
+    private final ElbowStates CurrentElbowState = ElbowStates.NULL;
+    private final ElbowStates RequestedElbowState = ElbowStates.NULL;
 
-    private WristState CurrentWristState = WristState.NULL;
-    private WristState RequestedWRistState = WristState.NULL;
+    private final WristState CurrentWristState = WristState.NULL;
+    private final WristState RequestedWRistState = WristState.NULL;
 
-    private ClawStates CurrentClawState = ClawStates.NULL;
-    private ClawStates RequestedClawState = ClawStates.NULL;
+    private final ClawStates CurrentClawState = ClawStates.NULL;
+    private final ClawStates RequestedClawState = ClawStates.NULL;
 
     public enum LiftState {
         NULL(0),
@@ -39,7 +39,7 @@ public class Lift {
         HANG_DEPLOYED_POSITION(2000);
 
         private final double value;
-        private LiftState(double value) {
+        LiftState(double value) {
             this.value = value;
         }
 
@@ -84,7 +84,7 @@ public class Lift {
         DEFAULT_POSITION(0.5);
 
         private final double value;
-        private ElbowStates(double value) {
+        ElbowStates(double value) {
             this.value = value;
         }
 
@@ -120,7 +120,7 @@ public class Lift {
         DEFAULT_POSITION(0.5);
 
         private final double value;
-        private WristState(double value) {
+        WristState(double value) {
             this.value = value;
         }
 
@@ -154,7 +154,7 @@ public class Lift {
         NULL(0);
 
         private final double value;
-        private ClawStates(double value) {
+        ClawStates(double value) {
             this.value = value;
         }
 

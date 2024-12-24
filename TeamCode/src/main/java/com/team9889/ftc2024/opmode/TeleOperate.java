@@ -56,13 +56,13 @@ public class TeleOperate extends LinearOpMode{
             mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x / 0.66);
 
 
-            if (gamepad1.a){
-                //are there encoders on intake extension motors
-                mRobot.mIntake.extension.setTargetPosition();
-                mRobot.mIntake.extension.setPower(0.5);
-                mRobot.mIntake.extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                mRobot.mIntake.setWristPosision();
-            }
+//            if (gamepad1.a){
+//                //are there encoders on intake extension motors
+//                mRobot.mIntake.extension.setTargetPosition();
+//                mRobot.mIntake.extension.setPower(0.5);
+//                mRobot.mIntake.extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                mRobot.mIntake.setWristPosision();
+//            }
 
 
         }

@@ -24,14 +24,14 @@ public class JustParkTC extends LinearOpMode {
         double minExtention = 0.024;
 
 
-        mRobot.mArm.setClawPosition(closedClaw);
-
-        mRobot.mArm.setExtetion(minExtention);
-
-        mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mRobot.mArm.arm.setTargetPosition(700);
-        mRobot.mArm.arm.setPower(0.2);
-        mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        mRobot.mArm.setClawPosition(closedClaw);
+//
+//        mRobot.mArm.setExtetion(minExtention);
+//
+//        mRobot.mArm.arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        mRobot.mArm.arm.setTargetPosition(700);
+//        mRobot.mArm.arm.setPower(0.2);
+//        mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         waitForStart();
@@ -70,35 +70,35 @@ public class JustParkTC extends LinearOpMode {
             sleep(500);
             mRobot.mDrive.brake();
 
-            mRobot.mArm.arm.setTargetPosition(850);
-            mRobot.mArm.arm.setPower(1);
-            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            sleep(500);
-
-            mRobot.mArm.setExtetion(maxExtension);
-            sleep(1000);
-
-            mRobot.mDrive.setPower(0.5, 0, 0);
-            sleep(700);
-            mRobot.mDrive.brake();
-
-            mRobot.mArm.setClawPosition(openClaw);
-            sleep(2000);
-
-            mRobot.mArm.setRotation(1);
-            sleep(1000);
-            mRobot.mArm.setRotation(0.35);
-
-            mRobot.mDrive.setPower(-0.5, 0, 0);
-            sleep(700);
-            mRobot.mDrive.brake();
-
-            mRobot.mArm.setExtetion(minExtention);
-            sleep(2000);
-
-            mRobot.mArm.arm.setTargetPosition(50);
-            mRobot.mArm.arm.setPower(1);
-            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            mRobot.mArm.arm.setTargetPosition(850);
+//            mRobot.mArm.arm.setPower(1);
+//            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            sleep(500);
+//
+//            mRobot.mArm.setExtetion(maxExtension);
+//            sleep(1000);
+//
+//            mRobot.mDrive.setPower(0.5, 0, 0);
+//            sleep(700);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mArm.setClawPosition(openClaw);
+//            sleep(2000);
+//
+//            mRobot.mArm.setRotation(1);
+//            sleep(1000);
+//            mRobot.mArm.setRotation(0.35);
+//
+//            mRobot.mDrive.setPower(-0.5, 0, 0);
+//            sleep(700);
+//            mRobot.mDrive.brake();
+//
+//            mRobot.mArm.setExtetion(minExtention);
+//            sleep(2000);
+//
+//            mRobot.mArm.arm.setTargetPosition(50);
+//            mRobot.mArm.arm.setPower(1);
+//            mRobot.mArm.arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
             autoTimer.reset();

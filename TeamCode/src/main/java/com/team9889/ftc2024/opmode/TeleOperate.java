@@ -1,6 +1,8 @@
 package com.team9889.ftc2024.opmode;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2024.subsystems.Intake;
@@ -31,6 +33,7 @@ public class TeleOperate extends LinearOpMode{
 
             // Send calculated power to wheels
             mRobot.mDrive.setPower(-gamepad1.left_stick_y, gamepad1.left_stick_x, -gamepad1.right_stick_x / 0.66);
+            mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(gamepad1.left_stick_x, -gamepad1.left_stick_y)));
 
             if (gamepad2.a){
                 requestedActions.add(mRobot.mLift.HighRung());

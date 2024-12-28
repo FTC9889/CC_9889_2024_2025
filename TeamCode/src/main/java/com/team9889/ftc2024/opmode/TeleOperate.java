@@ -36,8 +36,13 @@ public class TeleOperate extends LinearOpMode{
                 requestedActions.add(mRobot.mLift.HighRung());
             }
 
+            if (mRobot.mIntake.allowDriverExtension()){
+                mRobot.mIntake.setExtensionPower(-gamepad2.left_stick_y);
+            }
 
-
+            if (gamepad1.a) {
+                requestedActions.add(mRobot.mIntake.Retracted());
+            }
 
             List<Action> newActions = new ArrayList<>();
             for (Action action : requestedActions) {

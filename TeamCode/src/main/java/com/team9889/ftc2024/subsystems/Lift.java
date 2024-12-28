@@ -333,6 +333,8 @@ public class Lift {
         return new openClaw();
     }
 
+
+
     public class requestState implements Action {
         public requestState(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
             setRequestedLiftState(liftState);
@@ -341,33 +343,19 @@ public class Lift {
             setRequestedClawState(clawState);
         }
 
+        ElapsedTime wristTimer = new ElapsedTime();
+        boolean resetWristTimer = false;
+
+        ElapsedTime elbowTimer = new ElapsedTime();
+        boolean resetElbowTimer = false;
+
+        ElapsedTime clawTimer = new ElapsedTime();
+        boolean resetClawTimer = false;
+
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-
-            ElapsedTime wristTimer = new ElapsedTime();
-            boolean resetWristTimer = false;
-
-            switch (RequestedLiftState) {
-                case INTAKE_POSITION:
-//                    setLiftMotorPower();
-            }
-
             if (RequestedWristState != CurrentWristState) {
-                switch (RequestedWristState) {
-                    case INTAKE_POSITION:
-                        setWristPosition(WristState.INTAKE_POSITION.getTargetPosition());
-                    case RUNG_SCORE_POSITION:
-                        setWristPosition(WristState.RUNG_SCORE_POSITION.getTargetPosition());
-                    case BASKET_SCORE_POSITION:
-                        setWristPosition(WristState.BASKET_SCORE_POSITION.getTargetPosition());
-                    case HUMAN_PLAYER_POSITION:
-                        setWristPosition(WristState.HUMAN_PLAYER_POSITION.getTargetPosition());
-                    case DEFAULT_POSITION:
-                        setWristPosition(WristState.DEFAULT_POSITION.getTargetPosition());
-                    case NULL:
-                    default:
-                        break;
-                }
+                setWristPosition(RequestedWristState.getTargetPosition());
 
                 if (!resetWristTimer) wristTimer.reset();
 
@@ -379,26 +367,8 @@ public class Lift {
                 resetWristTimer = false;
             }
 
-            ElapsedTime elbowTimer = new ElapsedTime();
-            boolean resetElbowTimer = false;
-
-
             if (RequestedElbowState != CurrentElbowState) {
-                switch (RequestedElbowState) {
-                    case INTAKE_POSITION:
-                        setElbowPosition(ElbowStates.INTAKE_POSITION.getTargetPosition());
-                    case RUNG_SCORE_POSITION:
-                        setElbowPosition(ElbowStates.RUNG_SCORE_POSITION.getTargetPosition());
-                    case BASKET_SCORE_POSITION:
-                        setElbowPosition(ElbowStates.BASKET_SCORE_POSITION.getTargetPosition());
-                    case HUMAN_PLAYER_POSITION:
-                        setElbowPosition(ElbowStates.HUMAN_PLAYER_POSITION.getTargetPosition());
-                    case DEFAULT_POSITION:
-                        setElbowPosition(ElbowStates.DEFAULT_POSITION.getTargetPosition());
-                    case NULL:
-                    default:
-                        break;
-                }
+                setElbowPosition(RequestedElbowState.getTargetPosition());
 
                 if (!resetElbowTimer) elbowTimer.reset();
 
@@ -410,21 +380,8 @@ public class Lift {
                 resetElbowTimer = false;
             }
 
-            ElapsedTime clawTimer = new ElapsedTime();
-            boolean resetClawTimer = false;
-
             if (RequestedClawState != CurrentClawState) {
-                switch (RequestedClawState) {
-                    case OPEN_POSITION:
-                        setClawPosition(ClawStates.OPEN_POSITION.getTargetPosition());
-                    case CLOSED_POSITION:
-                        setClawPosition(ClawStates.CLOSED_POSITION.getTargetPosition());
-                    case LOOSE_POSITION:
-                        setClawPosition(ClawStates.LOOSE_POSITION.getTargetPosition());
-                    case NULL:
-                    default:
-                        break;
-                }
+                setClawPosition(RequestedClawState.getTargetPosition());
 
                 if (!resetClawTimer) clawTimer.reset();
 
@@ -436,7 +393,6 @@ public class Lift {
                 resetClawTimer = false;
             }
 
-
             if(RequestedLiftState != CurrentLiftState) {
                 setLiftPosition(CurrentLiftState.getTargetPosition());
                 if(liftInPosition) {
@@ -444,30 +400,7 @@ public class Lift {
                 }
             }
 
-            if(RequestedWristState != CurrentWristState) {
-                setWristPosition(CurrentWristState.getTargetPosition());
-                if(wristInPosition) {
-                    CurrentWristState = RequestedWristState;
-                }
-            }
-
-            if(RequestedElbowState != CurrentElbowState) {
-                setElbowPosition(CurrentElbowState.getTargetPosition());
-                if(liftInPosition) {
-                    CurrentElbowState = RequestedElbowState;
-                }
-            }
-
-            if(RequestedClawState != CurrentClawState) {
-                setClawPosition(CurrentClawState.getTargetPosition());
-                if(clawInPosition) {
-                    CurrentClawState = RequestedClawState;
-                }
-            }
-
-
-
-            return RequestedLiftState != CurrentLiftState && RequestedWristState != CurrentWristState && RequestedElbowState != CurrentElbowState && RequestedClawState != CurrentClawState;
+            return RequestedLiftState != CurrentLiftState || RequestedWristState != CurrentWristState || RequestedElbowState != CurrentElbowState || RequestedClawState != CurrentClawState;
         }
     }
 

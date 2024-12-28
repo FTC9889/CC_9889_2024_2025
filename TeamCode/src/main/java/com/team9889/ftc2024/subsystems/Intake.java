@@ -141,11 +141,20 @@ public class Intake {
     }
 
     public enum PowerState{
-        ON,
-        OFF,
-        SLOW,
-        OUTTAKE,
-        NULL;
+        ON(1),
+        OFF(0),
+        SLOW(0.5),
+        OUTTAKE(-1),
+        NULL(0);
+
+        private final double value;
+        PowerState(double value) {
+            this.value = value;
+        }
+
+        public double setTargetPower() {
+            return value;
+        }
 
         public String toString() {
             switch (this) {
@@ -166,6 +175,8 @@ public class Intake {
 
     public void init(HardwareMap hardwareMap){
         extension = (DcMotorEx) hardwareMap.get(DcMotor.class,"extension");
+        extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         intakeWristR = hardwareMap.servo.get("intakeWristR");
         intakeWristL = hardwareMap.servo.get("intakeWristL");
@@ -181,53 +192,53 @@ public class Intake {
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWristL.setDirection(Servo.Direction.REVERSE);
-
-
     }
 
+    final double closedPosition = 0;
+    final double openPosition = 1;
+
+    private void setExtensionLockPosition(double position){
+        intakeLock.setPosition(position);
+    }
+
+    private final double extensionPower = 0;
     public void setExtensionPower(double power){
-        extension.setPower(power);
+        double powerLevel = 0;
+        if (magnetSensor.getState() && power < 0){
+            powerLevel = 0;
+        }else {
+            powerLevel = power;
+        }
+
+        if (extensionPower != powerLevel)
+            extension.setPower(powerLevel);
     }
 
-    public void setIntakePower(double power){
+    private void setIntakePower(double power){
         intakeL.setPower(power);
         intakeR.setPower(power);
     }
 
-
-    public void intake(){
-        intakeR.setPower(1);
-        intakeL.setPower(1);
-    }
-
-    public void outtake(){
-        intakeR.setPower(-1);
-        intakeL.setPower(-1);
-    }
-
-    public void setWristPosision(double position){
+    private void setWristPosition(double position){
         intakeWristR.setPosition(position);
         intakeWristL.setPosition(position);
     }
 
+    private class requestState implements Action {
+        ElapsedTime wristTimer = new ElapsedTime();
+        boolean resetWristTimer = false;
 
-    public class wristDown implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            setWristPosision(0.5);
-            return false;
+        ElapsedTime lockTimer = new ElapsedTime();
+        ElapsedTime lockTimer2 = new ElapsedTime();
+        ElapsedTime lockTimer3 = new ElapsedTime();
+
+        int target = 0;
+
+        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor) {
+            this(intakeState, wristState, powerState, sampleColor, 0);
         }
-    }
-    private boolean intakeInPosition = false;
-    private boolean intakeInPosition() {
-        return intakeInPosition;
-    }
 
-
-
-
-    public class requestState implements Action {
-        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState,SampleColor sampleColor ) {
+        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor, int targetPosition) {
             setRequestedIntakeState(intakeState);
             setRequstedPowerState(powerState);
 
@@ -235,50 +246,64 @@ public class Intake {
                 setRequstedWristState(wristState);
 
             CurrentSampleColor = sampleColor;
+            target = targetPosition;
         }
-
-        ElapsedTime wristTimer = new ElapsedTime();
-        boolean resetWristTimer = false;
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
 
-             switch (RequestedIntakeState) {
-                 case INTAKE:
-                     CurrentIntakeState = RequestedIntakeState;
-                     break;
-                 case RETRACTED:
-                     switch (CurrentIntakeState){
-                         case INTAKE:
-                             if(CurrentWristState == WristState.MIDDLE_POSITION) {
+             // Intake Case
+             if (RequestedIntakeState == IntakeState.INTAKE) {
+                  setExtensionLockPosition(openPosition);
 
-                             } else {
-                                 setRequstedWristState(WristState.MIDDLE_POSITION);
-                             }
-                         case RETRACTED:
-                             break;
-                         case NULL:
-                             break;
-                         case AUTO_EXTEND:
-                             break;
-                     }
+                  if (lockTimer.milliseconds() > 50)
+                    CurrentIntakeState = RequestedIntakeState;
+             } else {
+                 lockTimer.reset();
              }
 
+            // Retracted
+            if (RequestedIntakeState == IntakeState.RETRACTED){
+                if (magnetSensor.getState())
+                    setExtensionLockPosition(closedPosition);
+                else {
+                    setExtensionLockPosition(openPosition);
+                    lockTimer2.reset();
+                }
+
+                if (lockTimer2.milliseconds() > 50)
+                    CurrentIntakeState = RequestedIntakeState;
+
+                if (extension.getCurrentPosition() < 100){
+                    extension.setPower(-0.3);
+                }else {
+                    extension.setPower(-1);
+                }
+            }
+
+            // Auto Extend
+            if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
+                if (lockTimer3.milliseconds() < 50) {
+                    setExtensionLockPosition(openPosition);
+                } else {
+                    extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extension.setTargetPosition(target);
+                    extension.setPower(1);
+                }
+
+                if (Math.abs(extension.getCurrentPosition() - target) < 10) {
+                    extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    extension.setTargetPosition(target);
+                    extension.setPower(0);
+                    CurrentIntakeState = RequestedIntakeState;
+                }
+            } else {
+                lockTimer3.reset();
+            }
+
+            // Wrist Control
              if (RequstedWristState != CurrentWristState) {
-                 switch (RequstedWristState) {
-                     case DOWN_POSITION:
-                         setWristPosision(WristState.DOWN_POSITION.getTargetPosition());
-                         break;
-                     case UP_POSITION:
-                         setWristPosision(WristState.UP_POSITION.getTargetPosition());
-                         break;
-                     case MIDDLE_POSITION:
-                         setWristPosision(WristState.MIDDLE_POSITION.getTargetPosition());
-                         break;
-                     case NULL:
-                     default:
-                         break;
-                 }
+                 setWristPosition(RequstedWristState.getTargetPosition());
 
                  if (!resetWristTimer) wristTimer.reset();
 
@@ -290,42 +315,21 @@ public class Intake {
                  resetWristTimer = false;
              }
 
-            if(CurrentIntakeState == IntakeState.INTAKE) {
-                setExtensionPower(driverIntakeCommand);
-            }
-
+             // Intake Power State
             if (RequstedPowerState != CurrentPowerState) {
-                switch (RequstedPowerState) {
-                    case ON:
-                        setIntakePower(1);
-                        break;
-                    case OFF:
-                        setIntakePower(0);
-                        break;
-                    case OUTTAKE:
-                        setIntakePower(-1);
-                        break;
-                    case SLOW:
-                        setIntakePower(0.5);
-                        break;
-                    case NULL:
-                    default:
-                        break;
-                }
-
+                setIntakePower(RequstedPowerState.setTargetPower());
                 CurrentPowerState = RequstedPowerState;
             }
 
+            allowDriverExtension = CurrentIntakeState == IntakeState.INTAKE && RequestedIntakeState == IntakeState.INTAKE;
 
-
-            return false;
+            return RequestedIntakeState == CurrentIntakeState || RequstedWristState == CurrentWristState || RequstedPowerState == CurrentPowerState;
         }
     }
 
-    double driverIntakeCommand = 0;
-
-    public void setDriverIntakeCommand(double joystick){
-        driverIntakeCommand = joystick;
+    private boolean allowDriverExtension = false;
+    public boolean allowDriverExtension(){
+        return allowDriverExtension;
     }
 
     public Action Deployed() {

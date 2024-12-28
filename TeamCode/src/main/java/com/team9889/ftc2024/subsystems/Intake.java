@@ -12,8 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import java.net.PortUnreachableException;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 public class Intake {
@@ -23,33 +22,59 @@ public class Intake {
     DigitalChannel magnetSensor;
     ColorSensor colorSensor;
 
-    private final IntakeState CurrentIntakeState = IntakeState.NULL;
-    private final IntakeState RequestedIntakeState = IntakeState.NULL;
+    private IntakeState CurrentIntakeState = IntakeState.NULL;
+    private IntakeState RequestedIntakeState = IntakeState.NULL;
 
-    private final WristState CurrentWristState = WristState.NULL;
-    private final WristState RequstedWristState = WristState.NULL;
+    private  WristState CurrentWristState = WristState.NULL;
+    private  WristState RequstedWristState = WristState.NULL;
 
-    private final PowerState CurrentPowerState = PowerState.NULL;
-    private final PowerState RequstedPowerState = PowerState.NULL;
+    private  PowerState CurrentPowerState = PowerState.NULL;
+    private  PowerState RequstedPowerState = PowerState.NULL;
 
-    private final SampleColor CurrentSampleColor = SampleColor.NULL;
+    private  SampleColor CurrentSampleColor = SampleColor.NULL;
+
+    public IntakeState getCurrentIntakeState() {
+        return CurrentIntakeState;
+    }
+
+    public WristState getCurrentWristState() {
+        return CurrentWristState;
+    }
+
+    public PowerState getCurrentPowerState() {
+        return CurrentPowerState;
+    }
+
+    public SampleColor getCurrentSampleColor() {
+        return CurrentSampleColor;
+    }
+
+    public void setRequestedIntakeState(IntakeState requestedIntakeState) {
+        RequestedIntakeState = requestedIntakeState;
+    }
+
+    public void setRequstedWristState(WristState requstedWristState) {
+        RequstedWristState = requstedWristState;
+    }
+
+    public void setRequstedPowerState(PowerState requstedPowerState) {
+        RequstedPowerState = requstedPowerState;
+    }
+
 
     public enum IntakeState {
         INTAKE,
-        OUTTAKE,
         RETRACTED,
         NULL,
-        SLIGHT_EXTEND;
+        AUTO_EXTEND;
 
         public String toString() {
             switch (this) {
                 case INTAKE:
                     return "INTAKE";
-                case OUTTAKE:
-                    return "OUTTAKE";
                 case RETRACTED:
                     return "RETRACTED";
-                case SLIGHT_EXTEND:
+                case AUTO_EXTEND:
                     return "SLIGHT EXTEND";
                 case NULL:
                 default:
@@ -59,10 +84,19 @@ public class Intake {
     }
 
     public enum WristState {
-        DOWN_POSITION,
-        MIDDLE_POSITION,
-        UP_POSITION,
-        NULL;
+        DOWN_POSITION(0.1),
+        MIDDLE_POSITION(0.5),
+        UP_POSITION(1),
+        NULL(0);
+
+        private final double value;
+        WristState(double value) {
+            this.value = value;
+        }
+
+        public double getTargetPosition() {
+            return value;
+        }
 
         public String toString() {
             switch (this) {
@@ -82,6 +116,8 @@ public class Intake {
     public enum SampleColor {
         NEUTRAL,
         RED,
+        RED_YELLOW,
+        BLUE_YELLOW,
         BLUE,
         NULL;
 
@@ -93,6 +129,10 @@ public class Intake {
                     return "BLUE";
                 case NEUTRAL:
                     return "NEUTRAL";
+                case RED_YELLOW:
+                    return "RED_YELLOW";
+                case BLUE_YELLOW:
+                    return "BLUE_YELLOW";
                 case NULL:
                 default:
                     return "NULL";
@@ -103,6 +143,8 @@ public class Intake {
     public enum PowerState{
         ON,
         OFF,
+        SLOW,
+        OUTTAKE,
         NULL;
 
         public String toString() {
@@ -111,6 +153,10 @@ public class Intake {
                     return "ON";
                 case OFF:
                     return "OFF";
+                case SLOW:
+                    return "SLOW";
+                case OUTTAKE:
+                    return "OUTTAKE";
                 case NULL:
                 default:
                     return "NULL";
@@ -139,10 +185,31 @@ public class Intake {
 
     }
 
+    public void setExtensionPower(double power){
+        extension.setPower(power);
+    }
+
+    public void setIntakePower(double power){
+        intakeL.setPower(power);
+        intakeR.setPower(power);
+    }
+
+
+    public void intake(){
+        intakeR.setPower(1);
+        intakeL.setPower(1);
+    }
+
+    public void outtake(){
+        intakeR.setPower(-1);
+        intakeL.setPower(-1);
+    }
+
     public void setWristPosision(double position){
         intakeWristR.setPosition(position);
         intakeWristL.setPosition(position);
     }
+
 
     public class wristDown implements Action {
         @Override
@@ -151,9 +218,128 @@ public class Intake {
             return false;
         }
     }
+    private boolean intakeInPosition = false;
+    private boolean intakeInPosition() {
+        return intakeInPosition;
+    }
 
-    public Action wristDown(){
-        return new wristDown();
+
+
+
+    public class requestState implements Action {
+        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState,SampleColor sampleColor ) {
+            setRequestedIntakeState(intakeState);
+            setRequstedPowerState(powerState);
+
+            if (intakeState != IntakeState.RETRACTED)
+                setRequstedWristState(wristState);
+
+            CurrentSampleColor = sampleColor;
+        }
+
+        ElapsedTime wristTimer = new ElapsedTime();
+        boolean resetWristTimer = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+             switch (RequestedIntakeState) {
+                 case INTAKE:
+                     CurrentIntakeState = RequestedIntakeState;
+                     break;
+                 case RETRACTED:
+                     switch (CurrentIntakeState){
+                         case INTAKE:
+                             if(CurrentWristState == WristState.MIDDLE_POSITION) {
+
+                             } else {
+                                 setRequstedWristState(WristState.MIDDLE_POSITION);
+                             }
+                         case RETRACTED:
+                             break;
+                         case NULL:
+                             break;
+                         case AUTO_EXTEND:
+                             break;
+                     }
+             }
+
+             if (RequstedWristState != CurrentWristState) {
+                 switch (RequstedWristState) {
+                     case DOWN_POSITION:
+                         setWristPosision(WristState.DOWN_POSITION.getTargetPosition());
+                         break;
+                     case UP_POSITION:
+                         setWristPosision(WristState.UP_POSITION.getTargetPosition());
+                         break;
+                     case MIDDLE_POSITION:
+                         setWristPosision(WristState.MIDDLE_POSITION.getTargetPosition());
+                         break;
+                     case NULL:
+                     default:
+                         break;
+                 }
+
+                 if (!resetWristTimer) wristTimer.reset();
+
+                 if(wristTimer.seconds() >
+                         0.1 * Math.abs(RequstedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
+                     CurrentWristState = RequstedWristState;
+
+             } else {
+                 resetWristTimer = false;
+             }
+
+            if(CurrentIntakeState == IntakeState.INTAKE) {
+                setExtensionPower(driverIntakeCommand);
+            }
+
+            if (RequstedPowerState != CurrentPowerState) {
+                switch (RequstedPowerState) {
+                    case ON:
+                        setIntakePower(1);
+                        break;
+                    case OFF:
+                        setIntakePower(0);
+                        break;
+                    case OUTTAKE:
+                        setIntakePower(-1);
+                        break;
+                    case SLOW:
+                        setIntakePower(0.5);
+                        break;
+                    case NULL:
+                    default:
+                        break;
+                }
+
+                CurrentPowerState = RequstedPowerState;
+            }
+
+
+
+            return false;
+        }
+    }
+
+    double driverIntakeCommand = 0;
+
+    public void setDriverIntakeCommand(double joystick){
+        driverIntakeCommand = joystick;
+    }
+
+    public Action Deployed() {
+        return new requestState(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+    }
+
+    public Action Retracted() {
+        return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.SLOW, CurrentSampleColor);
+    }
+
+    public Action AutoSamples() {
+        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
     }
 }
+
+
 

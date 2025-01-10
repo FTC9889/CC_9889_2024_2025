@@ -8,12 +8,14 @@ public class Robot {
     public PinpointDrive mDrive;
     public Intake mIntake = new Intake();
     public Lift mLift = new Lift();
+    public Flag mFlag = new Flag();
 
 
     public void init(HardwareMap hardwareMap, Pose2d pose2d) {
         mDrive = new PinpointDrive(hardwareMap, pose2d);
         mIntake.init(hardwareMap);
         mLift.init(hardwareMap);
+        mFlag.init(hardwareMap);
     }
 
     public void init(HardwareMap hardwareMap) {

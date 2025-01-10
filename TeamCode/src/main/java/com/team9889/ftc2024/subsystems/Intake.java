@@ -19,7 +19,7 @@ public class Intake {
     public DcMotorEx extension;
     Servo intakeWristR, intakeWristL, intakeLock;
     CRServo intakeR, intakeL;
-    DigitalChannel magnetSensor;
+    public DigitalChannel magnetSensor;
     ColorSensor colorSensor;
 
     private IntakeState CurrentIntakeState = IntakeState.NULL;
@@ -62,11 +62,26 @@ public class Intake {
     }
 
 
+
+
+    public void setIntakeLockPosition(double position){
+        intakeLock.setPosition(position);
+    }
+
+    public void setIntakeWristPosition(double position){
+        intakeWristL.setPosition(position);
+        intakeWristR.setPosition(position);
+    }
+
+
+
+
     public enum IntakeState {
         INTAKE,
         RETRACTED,
         NULL,
-        AUTO_EXTEND;
+        AUTO_EXTEND,
+        AUTO_SPECIMEN_EXTEND;
 
         public String toString() {
             switch (this) {
@@ -75,7 +90,9 @@ public class Intake {
                 case RETRACTED:
                     return "RETRACTED";
                 case AUTO_EXTEND:
-                    return "SLIGHT EXTEND";
+                    return "AUTO_EXTEND";
+                case AUTO_SPECIMEN_EXTEND:
+                    return "AUTO_SPECIMEN_EXTEND";
                 case NULL:
                 default:
                     return "NULL";
@@ -84,9 +101,9 @@ public class Intake {
     }
 
     public enum WristState {
-        DOWN_POSITION(0.1),
+        DOWN_POSITION(0.77),
         MIDDLE_POSITION(0.5),
-        UP_POSITION(1),
+        UP_POSITION(0.17),
         NULL(0);
 
         private final double value;
@@ -141,10 +158,10 @@ public class Intake {
     }
 
     public enum PowerState{
-        ON(1),
+        ON(-1),
         OFF(0),
-        SLOW(0.5),
-        OUTTAKE(-1),
+        SLOW(-0.15),
+        OUTTAKE(-0.5),
         NULL(0);
 
         private final double value;
@@ -187,14 +204,21 @@ public class Intake {
 
         magnetSensor = hardwareMap.digitalChannel.get("magnetSensor");
 
-        colorSensor = hardwareMap.colorSensor.get("colorSensor");
+        colorSensor = hardwareMap.colorSensor.get("colorsensor");
 
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWristL.setDirection(Servo.Direction.REVERSE);
+
+        extension.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        if (magnetSensor.getState() == true) {
+            extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 
-    final double closedPosition = 0;
+    final double closedPosition = 0.5;
     final double openPosition = 1;
 
     private void setExtensionLockPosition(double position){
@@ -214,7 +238,7 @@ public class Intake {
             extension.setPower(powerLevel);
     }
 
-    private void setIntakePower(double power){
+    public void setIntakePower(double power){
         intakeL.setPower(power);
         intakeR.setPower(power);
     }
@@ -342,6 +366,10 @@ public class Intake {
 
     public Action AutoSamples() {
         return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+    }
+
+    public Action AutoSpecimenSamples() {
+        return new requestState(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
     }
 }
 

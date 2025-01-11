@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,8 +12,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 public class Intake {
@@ -20,16 +25,16 @@ public class Intake {
     Servo intakeWristR, intakeWristL, intakeLock;
     CRServo intakeR, intakeL;
     public DigitalChannel magnetSensor;
-    ColorSensor colorSensor;
+    public RevColorSensorV3 colorSensor;
 
     private IntakeState CurrentIntakeState = IntakeState.NULL;
-    private IntakeState RequestedIntakeState = IntakeState.NULL;
+    public IntakeState RequestedIntakeState = IntakeState.NULL;
 
     private  WristState CurrentWristState = WristState.NULL;
-    private  WristState RequstedWristState = WristState.NULL;
+    public   WristState RequstedWristState = WristState.NULL;
 
     private  PowerState CurrentPowerState = PowerState.NULL;
-    private  PowerState RequstedPowerState = PowerState.NULL;
+    public   PowerState RequstedPowerState = PowerState.NULL;
 
     private  SampleColor CurrentSampleColor = SampleColor.NULL;
 
@@ -204,7 +209,7 @@ public class Intake {
 
         magnetSensor = hardwareMap.digitalChannel.get("magnetSensor");
 
-        colorSensor = hardwareMap.colorSensor.get("colorsensor");
+        colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -212,7 +217,7 @@ public class Intake {
 
         extension.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        if (magnetSensor.getState() == true) {
+        if (magnetSensor.getState() == false) {
             extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
@@ -225,22 +230,27 @@ public class Intake {
         intakeLock.setPosition(position);
     }
 
-    private final double extensionPower = 0;
+    private double extensionPower = 0;
     public void setExtensionPower(double power){
-        double powerLevel = 0;
-        if (magnetSensor.getState() && power < 0){
+        double powerLevel;
+        if (!magnetSensor.getState() && power < 0){
             powerLevel = 0;
         }else {
             powerLevel = power;
         }
 
-        if (extensionPower != powerLevel)
+        if (extensionPower != powerLevel) {
             extension.setPower(powerLevel);
+            extensionPower = powerLevel;
+        }
     }
 
     public void setIntakePower(double power){
         intakeL.setPower(power);
         intakeR.setPower(power);
+        if(power == PowerState.OFF.value) {
+            CurrentPowerState = PowerState.OFF;
+        }
     }
 
     private void setWristPosition(double position){
@@ -264,10 +274,11 @@ public class Intake {
 
         public requestState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor, int targetPosition) {
             setRequestedIntakeState(intakeState);
-            setRequstedPowerState(powerState);
 
-            if (intakeState != IntakeState.RETRACTED)
+            if (intakeState != IntakeState.RETRACTED) {
                 setRequstedWristState(wristState);
+                setRequstedPowerState(powerState);
+            }
 
             CurrentSampleColor = sampleColor;
             target = targetPosition;
@@ -275,6 +286,22 @@ public class Intake {
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+            // Wrist Control
+            if (RequstedWristState != CurrentWristState) {
+                setWristPosition(RequstedWristState.getTargetPosition());
+
+                if(!resetWristTimer) {
+                    wristTimer.reset();
+                    resetWristTimer = true;
+                }
+
+                if(wristTimer.milliseconds() > 500) {
+                    CurrentWristState = RequstedWristState;
+                }
+            } else {
+                resetWristTimer = false;
+            }
 
              // Intake Case
              if (RequestedIntakeState == IntakeState.INTAKE) {
@@ -288,20 +315,22 @@ public class Intake {
 
             // Retracted
             if (RequestedIntakeState == IntakeState.RETRACTED){
-                if (magnetSensor.getState())
+                if (!magnetSensor.getState()) {
                     setExtensionLockPosition(closedPosition);
-                else {
-                    setExtensionLockPosition(openPosition);
-                    lockTimer2.reset();
-                }
-
-                if (lockTimer2.milliseconds() > 50)
+                    extension.setPower(0);
+                    setRequstedPowerState(PowerState.ON);
                     CurrentIntakeState = RequestedIntakeState;
+                } else {
+                    setExtensionLockPosition(openPosition);
 
-                if (extension.getCurrentPosition() < 100){
-                    extension.setPower(-0.3);
-                }else {
-                    extension.setPower(-1);
+                    if (extension.getCurrentPosition() < 100){
+                        extension.setPower(-0.3);
+                        setRequstedWristState(WristState.UP_POSITION);
+                        setRequstedPowerState(PowerState.OUTTAKE);
+                    }else {
+                        extension.setPower(-1);
+                        setRequstedWristState(WristState.MIDDLE_POSITION);
+                    }
                 }
             }
 
@@ -325,20 +354,6 @@ public class Intake {
                 lockTimer3.reset();
             }
 
-            // Wrist Control
-             if (RequstedWristState != CurrentWristState) {
-                 setWristPosition(RequstedWristState.getTargetPosition());
-
-                 if (!resetWristTimer) wristTimer.reset();
-
-                 if(wristTimer.seconds() >
-                         0.1 * Math.abs(RequstedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
-                     CurrentWristState = RequstedWristState;
-
-             } else {
-                 resetWristTimer = false;
-             }
-
              // Intake Power State
             if (RequstedPowerState != CurrentPowerState) {
                 setIntakePower(RequstedPowerState.setTargetPower());
@@ -347,7 +362,39 @@ public class Intake {
 
             allowDriverExtension = CurrentIntakeState == IntakeState.INTAKE && RequestedIntakeState == IntakeState.INTAKE;
 
-            return RequestedIntakeState == CurrentIntakeState || RequstedWristState == CurrentWristState || RequstedPowerState == CurrentPowerState;
+            return RequestedIntakeState != CurrentIntakeState || RequstedWristState != CurrentWristState || RequstedPowerState != CurrentPowerState;
+        }
+    }
+
+    public boolean sampleInIntake(){
+        return colorSensor.getDistance(DistanceUnit.INCH) < 1.5;
+    }
+
+    public SampleColor getIntakeColor(){
+        if (colorSensor.getDistance(DistanceUnit.INCH) < 1.5){
+            double red = colorSensor.red();
+            double green = colorSensor.green();
+            double blue = colorSensor.blue();
+
+            double total = red + green + blue;
+
+            red /= total;
+            green /= total;
+            blue /= total;
+
+            red *= 10;
+            green *= 10;
+            blue *= 10;
+
+            if (red > blue && red > green) {
+                return SampleColor.RED;
+            } else if (blue > red && blue > green) {
+                return SampleColor.BLUE;
+            } else {
+                return SampleColor.NEUTRAL;
+            }
+        } else {
+            return SampleColor.NULL;
         }
     }
 

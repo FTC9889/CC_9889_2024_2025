@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2024.subsystems.Robot;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp
 @Config
 public class TeleOpTest extends LinearOpMode {
@@ -31,45 +33,44 @@ public class TeleOpTest extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()) {
 
-            if (gamepad1.a){
+            if (gamepad1.a) {
                 mRobot.mIntake.setIntakeLockPosition(intakeLockPosition);
             }
 
-            if (gamepad1.b){
+            if (gamepad1.b) {
                 mRobot.mIntake.setIntakeWristPosition(intkaeWristPosition);
             }
 
-            if (gamepad1.x){
+            if (gamepad1.x) {
                 mRobot.mIntake.setIntakePower(intakePower);
-            }else {
+            } else {
                 mRobot.mIntake.setIntakePower(0);
             }
 
-            if (gamepad1.y){
+            if (gamepad1.y) {
                 mRobot.mIntake.setExtensionPower(intakeExtensionPower);
             } else {
                 mRobot.mIntake.setExtensionPower(0);
             }
 
 
-
-            if (gamepad1.left_bumper){
+            if (gamepad1.left_bumper) {
                 mRobot.mLift.setClawPosition(clawPosition);
             }
 
-            if (gamepad1.right_bumper){
+            if (gamepad1.right_bumper) {
                 mRobot.mLift.setLiftMotorPower(liftPower);
-            }else {
+            } else {
                 mRobot.mLift.setLiftMotorPower(0);
             }
 
-            if (gamepad1.dpad_down){
+            if (gamepad1.dpad_down) {
                 mRobot.mLift.setElbowPosition(liftElbowPosition);
             }
 
-            if (gamepad1.dpad_right){
+            if (gamepad1.dpad_right) {
                 mRobot.mLift.setWristPosition(liftWristPosition);
             }
 
@@ -77,7 +78,42 @@ public class TeleOpTest extends LinearOpMode {
             telemetry.addData("CurrentLiftPosition", mRobot.mLift.currentLiftPosition());
             telemetry.addData("CurrentIntakePosition", mRobot.mIntake.extension.getCurrentPosition());
             telemetry.addData("IntakeMagnetState", mRobot.mIntake.magnetSensor.getState());
+
             telemetry.addData("LiftMagnetState", mRobot.mLift.liftMagnetSensor.getState());
+            telemetry.addData("ColorSensorDistance", mRobot.mIntake.colorSensor.getDistance(DistanceUnit.INCH));
+
+            String text = "";
+            if (mRobot.mIntake.colorSensor.getDistance(DistanceUnit.INCH) < 1.5){
+                double red = mRobot.mIntake.colorSensor.red();
+                double green = mRobot.mIntake.colorSensor.green();
+                double blue = mRobot.mIntake.colorSensor.blue();
+
+                double total = red + green + blue;
+
+                red /= total;
+                green /= total;
+                blue /= total;
+
+                red *= 10;
+                green *= 10;
+                blue *= 10;
+
+                if (red > blue && red > green) {
+                    text = "red";
+                } else if (blue > red && blue > green) {
+                    text = "blue";
+                } else {
+                    text = "yellow";
+                }
+            } else {
+                text = "nothing";
+            }
+
+//            telemetry.addData("ColorSensorColorBlue", blue);
+//            telemetry.addData("ColorSensorColorRed", red);
+//            telemetry.addData("ColorSensorColorGreen", green);
+//            telemetry.addData("Average of Red and Green", (red + green)/2);
+            telemetry.addData("Current Color", text);
             telemetry.update();
 
 

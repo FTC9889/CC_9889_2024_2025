@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.team9889.ftc2024.subsystems.PinpointDrive;
+import com.team9889.ftc2024.subsystems.SparkFunOTOSDrive;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
@@ -24,7 +25,17 @@ public final class SplineTest extends LinearOpMode {
                             .splineTo(new Vector2d(30, 30), Math.PI / 2)
                             .splineTo(new Vector2d(0, 60), Math.PI)
                             .build());
-        } else {
+        } else if (TuningOpModes.DRIVE_CLASS.equals(SparkFunOTOSDrive.class)) {
+            SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
+
+            waitForStart();
+
+            Actions.runBlocking(
+                    drive.actionBuilder(beginPose)
+                            .splineTo(new Vector2d(30, 30), Math.PI / 2)
+                            .splineTo(new Vector2d(0, 60), Math.PI)
+                            .build());
+        }else {
             throw new RuntimeException();
         }
     }

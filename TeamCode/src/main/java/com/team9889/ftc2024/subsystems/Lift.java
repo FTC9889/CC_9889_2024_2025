@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 public class Lift {
     DcMotorEx liftMotorR, liftMotorL, liftMotor3;
@@ -19,26 +20,20 @@ public class Lift {
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
-    final double closedClaw = 0;
-    final double openClaw = 1;
-    final double looseClaw = 0.5;
-
-    double lift_kp = 0.1;
-    double lift_kd = 0.1;
-
-
+    double lift_kp = 2;
+    double lift_kd = 0.02;
 
     private LiftState CurrentLiftState = LiftState.NULL;
-    private LiftState RequestedLiftState = LiftState.NULL;
+    public LiftState RequestedLiftState = LiftState.NULL;
 
     private ElbowStates CurrentElbowState = ElbowStates.NULL;
-    private ElbowStates RequestedElbowState = ElbowStates.NULL;
+    public ElbowStates RequestedElbowState = ElbowStates.NULL;
 
     private WristState CurrentWristState = WristState.NULL;
-    private WristState RequestedWristState = WristState.NULL;
+    public WristState RequestedWristState = WristState.NULL;
 
     private ClawStates CurrentClawState = ClawStates.NULL;
-    private ClawStates RequestedClawState = ClawStates.NULL;
+    public ClawStates RequestedClawState = ClawStates.NULL;
 
     public LiftState getCurrentLiftState() {
         return CurrentLiftState;
@@ -74,7 +69,7 @@ public class Lift {
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
         LOW_RUNG_POSITION(86),
-        HIGH_RUNG_POSITION(233 + 76),
+        HIGH_RUNG_POSITION(309),
         HIGH_RUNG_RELEASED_POSITION(152 + 76),
         HIGH_RUNG_SCORE_POSITION(152 + 76),
         LOW_BASKET_POSITION(231 + 76),
@@ -126,14 +121,13 @@ public class Lift {
 
     public enum ElbowStates{
         NULL(0),
-        INTAKE_POSITION(0.1),
+        INTAKE_POSITION(0.6),
         HUMAN_PLAYER_POSITION(0.2),
-        RUNG_SCORE_POSITION(0.3),
-        BASKET_SCORE_POSITION(0.4),
-        BASKET_SCORE_READY_POSITION(0.4),
-        DEFAULT_POSITION(0.7),
-        LEVEL_ONE_ASSENT_POSITION(0.5),
-        TRANSFER_POSITION(0.5);
+        RUNG_SCORE_POSITION(0.2),
+        BASKET_SCORE_POSITION(0.2),
+        BASKET_SCORE_READY_POSITION(0),
+        DEFAULT_POSITION(0.2),
+        TRANSFER_POSITION(0.78);
 
         private final double value;
         ElbowStates(double value) {
@@ -160,8 +154,7 @@ public class Lift {
                     return " DEFAULT_POSITION";
                 case   TRANSFER_POSITION:
                     return " TRANSFER_POSITION";
-                case   LEVEL_ONE_ASSENT_POSITION:
-                    return " LEVEL_ONE_ASSENT_POSITION";
+
                 case NULL:
                 default:
                     return "NULL";
@@ -171,14 +164,13 @@ public class Lift {
 
     public enum WristState{
         NULL(0),
-        INTAKE_POSITION(0.1),
-        HUMAN_PLAYER_POSITION(0.68),
-        RUNG_SCORE_POSITION(0.68),
-        BASKET_SCORE_POSITION(0.4),
-        BASKET_SCORE_READY_POSITION(0.4),
-        DEFAULT_POSITION(0.68),
-        LEVEL_ONE_ASSENT_POSITION(0.5),
-        TRANSFER_POSITION(0.5);
+        INTAKE_POSITION(0.35),
+        HUMAN_PLAYER_POSITION(0.6),
+        RUNG_SCORE_POSITION(0.8),
+        BASKET_SCORE_POSITION(0.8),
+        BASKET_SCORE_READY_POSITION(0.6),
+        DEFAULT_POSITION(0.8),
+        TRANSFER_POSITION(0.43);
 
         private final double value;
         WristState(double value) {
@@ -205,8 +197,7 @@ public class Lift {
                     return " DEFAULT_POSITION";
                 case   TRANSFER_POSITION:
                     return " TRANSFER_POSITION";
-                case   LEVEL_ONE_ASSENT_POSITION:
-                    return " LEVEL_ONE_ASSENT_POSITION";
+
                 case NULL:
                 default:
                     return "NULL";
@@ -258,9 +249,9 @@ public class Lift {
 //        shift1 = hardwareMap.servo.get("shift1");
 //        shift2 = hardwareMap.servo.get("shift2");
 
-        liftMagnetSensor = hardwareMap.digitalChannel.get("magnetSensor");
+        liftMagnetSensor = hardwareMap.digitalChannel.get("liftMagnetSensor");
 
-        liftMotorL.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftMotorR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         elbowL.setDirection(Servo.Direction.REVERSE);
     }
@@ -276,36 +267,31 @@ public class Lift {
         claw.setPosition(position);
     }
 
-    private double lastPower = 1;
     public void setLiftMotorPower(double power){
-        if (lastPower != power) {
-            if (liftMagnetSensor.getState() == true){
-                if (power < 0) {
-                    liftMotorR.setPower(0);
-                    liftMotorL.setPower(0);
-                } else {
-                    liftMotorL.setPower(power);
-                    liftMotorR.setPower(power);
-                }
-
-                offset = liftMotorR.getCurrentPosition();
+        if (!liftMagnetSensor.getState()){
+            if (power < 0) {
+                liftMotorR.setPower(0);
+                liftMotorL.setPower(0);
             } else {
                 liftMotorL.setPower(power);
                 liftMotorR.setPower(power);
             }
-        }
 
-        lastPower = power;
+            offset = liftMotorR.getCurrentPosition();
+        } else {
+            liftMotorL.setPower(power);
+            liftMotorR.setPower(power);
+
+        }
     }
 
     private int offset = 0;
     public int currentLiftPosition(){
-        return liftMotorR.getCurrentPosition() - offset;
+        return -(liftMotorR.getCurrentPosition() - offset);
     }
 
-    private boolean liftInPosition = false;
     private boolean liftInPosition() {
-        return liftInPosition;
+        return Math.abs(liftTargetPosition - currentLiftPosition()) <= 20;
     }
 
     private boolean wristInPosition = false;
@@ -324,11 +310,8 @@ public class Lift {
     }
 
     private int liftTargetPosition = 0;
-    private int lastTarget = 0;
     public void setLiftPosition(int position){
         liftTargetPosition = position;
-        if(liftTargetPosition != lastTarget) liftInPosition = false;
-        lastTarget = liftTargetPosition;
     }
 
     public void closedClaw(){
@@ -360,9 +343,18 @@ public class Lift {
         return new openClaw();
     }
 
+    static ElapsedTime wristTimer = new ElapsedTime();
+    static boolean resetWristTimer = true;
+
+    static ElapsedTime elbowTimer = new ElapsedTime();
+    static boolean resetElbowTimer = false;
+
+    static ElapsedTime clawTimer = new ElapsedTime();
+    static boolean resetClawTimer = false;
 
 
     public class requestState implements Action {
+
         public requestState(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
             setRequestedLiftState(liftState);
             setRequestedElbowState(elbowState);
@@ -370,34 +362,34 @@ public class Lift {
             setRequestedClawState(clawState);
         }
 
-        ElapsedTime wristTimer = new ElapsedTime();
-        boolean resetWristTimer = false;
-
-        ElapsedTime elbowTimer = new ElapsedTime();
-        boolean resetElbowTimer = false;
-
-        ElapsedTime clawTimer = new ElapsedTime();
-        boolean resetClawTimer = false;
-
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            RobotLog.d("Timer: " + wristTimer.seconds() + " " + resetWristTimer);
+
             if (RequestedWristState != CurrentWristState) {
                 setWristPosition(RequestedWristState.getTargetPosition());
 
-                if (!resetWristTimer) wristTimer.reset();
+                if (resetWristTimer) {
+                    wristTimer.reset();
+                    resetWristTimer = false;
+                }
 
                 if(wristTimer.seconds() >
                         0.1 * Math.abs(RequestedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
                     CurrentWristState = RequestedWristState;
 
             } else {
-                resetWristTimer = false;
+                resetWristTimer = true;
             }
+
 
             if (RequestedElbowState != CurrentElbowState) {
                 setElbowPosition(RequestedElbowState.getTargetPosition());
 
-                if (!resetElbowTimer) elbowTimer.reset();
+                if (!resetElbowTimer) {
+                    elbowTimer.reset();
+                    resetElbowTimer = true;
+                }
 
                 if(elbowTimer.seconds() >
                         0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
@@ -410,7 +402,10 @@ public class Lift {
             if (RequestedClawState != CurrentClawState) {
                 setClawPosition(RequestedClawState.getTargetPosition());
 
-                if (!resetClawTimer) clawTimer.reset();
+                if (!resetClawTimer) {
+                    clawTimer.reset();
+                    resetClawTimer = true;
+                }
 
                 if(clawTimer.seconds() >
                         0.1 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
@@ -421,8 +416,9 @@ public class Lift {
             }
 
             if(RequestedLiftState != CurrentLiftState) {
-                setLiftPosition(CurrentLiftState.getTargetPosition());
-                if(liftInPosition) {
+                setLiftPosition(RequestedLiftState.getTargetPosition());
+
+                if(liftInPosition()) {
                     CurrentLiftState = RequestedLiftState;
                 }
             }
@@ -436,27 +432,35 @@ public class Lift {
     public class LiftControl implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            double power;
             double error = liftTargetPosition - currentLiftPosition();
-            double derror = 0;
+            if(liftTargetPosition != 0) {
 
-            if(liftTimer != null) derror = (error - lastError) / liftTimer.seconds();
+                power = lift_kp * error;
+                power = Math.min(power, 1);
 
-            double power = lift_kp * error + lift_kd * derror;
-            power = Math.max(power, 1);
+                setLiftMotorPower(power);
 
-            setLiftMotorPower(power);
+                // Reset Timer
+                if (liftTimer == null) {
+                    liftTimer = new ElapsedTime();
+                } else {
+                    liftTimer.reset();
+                }
 
-            liftInPosition = Math.abs(error) <= 20;
-
-            // Reset Timer
-            if(liftTimer == null) {
-                liftTimer = new ElapsedTime();
+                // Set last error
+                lastError = error;
             } else {
-                liftTimer.reset();
+                if(currentLiftPosition() > 200) {
+                    power = -1;
+                } else {
+                    power = -0.3;
+                }
+
+                setLiftMotorPower(power);
             }
 
-            // Set last error
-            lastError = error;
+            RobotLog.d("Power: " + power);
 
             return true;
         }
@@ -525,17 +529,4 @@ public class Lift {
     public Action AutoDrop(){
         return new requestState(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.OPEN_POSITION);
     }
-
-    public Action LevelOneAssent(){
-        return new requestState(LiftState.LEVEL_ONE_ASSENT_POSITION, ElbowStates.LEVEL_ONE_ASSENT_POSITION, WristState.LEVEL_ONE_ASSENT_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-
-
-
-
-
-
-
-
 }

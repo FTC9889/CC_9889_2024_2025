@@ -69,7 +69,7 @@ public class YellowAuto extends LinearOpMode {
                         .waitSeconds(0.25)
                         .stopAndAdd(mRobot.mLift.TransferPrepare())
                         .splineToLinearHeading(new Pose2d(-20, 0, Math.toRadians(180)), 0)
-                        .stopAndAdd(mRobot.mLift.LevelOneAssent())
+//                        .stopAndAdd(mRobot.mLift.LevelOneAssent())
                         .build()
         );
 

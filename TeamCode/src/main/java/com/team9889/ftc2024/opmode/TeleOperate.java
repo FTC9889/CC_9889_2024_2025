@@ -17,7 +17,7 @@ import java.util.List;
 public class TeleOperate extends LinearOpMode{
     Robot mRobot = new Robot();
     private List<Action> requestedActions = new ArrayList<>();
-
+    boolean score = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -41,7 +41,7 @@ public class TeleOperate extends LinearOpMode{
             if (mRobot.mIntake.allowDriverExtension()){
                 if(Math.abs(gamepad1.right_trigger) > Math.abs(gamepad1.left_trigger))
                     mRobot.mIntake.setExtensionPower(gamepad1.right_trigger);
-                else if(Math.abs(gamepad1.right_trigger) > Math.abs(gamepad1.left_trigger))
+                else if(Math.abs(gamepad1.right_trigger) < Math.abs(gamepad1.left_trigger))
                     mRobot.mIntake.setExtensionPower(-gamepad1.left_trigger);
                 else
                     mRobot.mIntake.setExtensionPower(0);
@@ -51,45 +51,55 @@ public class TeleOperate extends LinearOpMode{
                 intakeAction = mRobot.mIntake.Deployed();
                 liftAction = mRobot.mLift.TransferPrepare();
             } else if (gamepad1.y) {
-                intakeAction = mRobot.mIntake.Retracted() ;
+                intakeAction = mRobot.mIntake.Retracted();
+                score = false;
             }
 
             if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
                 if (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.BLUE
                         || mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL){
                     intakeAction = mRobot.mIntake.Retracted();
+                    score = false;
+                }
+                if ((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.RED || gamepad1.b) && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION){
+                    intakeAction = mRobot.mIntake.Outtake();
                 }
             }
 
-            if(mRobot.mIntake.getCurrentWristState() == Intake.WristState.UP_POSITION
-                    && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION) {
-                liftAction = mRobot.mLift.TransferReady();
-            } else if(mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION) {
-                liftAction = mRobot.mLift.TransferComplete();
-                mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
-            } else if(mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
-                    && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.TRANSFER_POSITION) {
-                liftAction = mRobot.mLift.ScorePrepare();
-            }
+            if (!score) {
+                if (mRobot.mIntake.getCurrentWristState() == Intake.WristState.UP_POSITION
+                        && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION) {
+                    liftAction = mRobot.mLift.TransferReady();
+                } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
+                        && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION) {
+                    liftAction = mRobot.mLift.TransferComplete();
+                    mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
+                } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
+                        && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.TRANSFER_POSITION) {
+                    liftAction = mRobot.mLift.ScorePrepare();
+                }
 
-            if (gamepad2.a && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION) {
-                liftAction = mRobot.mLift.HighBasketReady();
-            }
+                if (gamepad2.a && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION) {
+                    liftAction = mRobot.mLift.HighBasketReady();
+                    intakeAction = mRobot.mIntake.Outtake();
+                }
 
-            if(gamepad1.right_bumper && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION) {
-                liftAction = mRobot.mLift.HighBasketReadyScored();
+                if (gamepad1.right_bumper && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION) {
+                    liftAction = mRobot.mLift.HighBasketReadyScored();
+                }
             }
 
             if(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION
                     && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.BASKET_SCORE_READY_POSITION
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION && !gamepad1.right_bumper) {
+                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION && !gamepad1.right_bumper && mRobot.mLift.getCurrentDraw() < 10000) {
                 liftAction = mRobot.mLift.TransferPrepare();
+                intakeAction = mRobot.mIntake.Retracted();
+                score = true;
             }
 
             List<Action> newActions = new ArrayList<>();
@@ -117,6 +127,9 @@ public class TeleOperate extends LinearOpMode{
                 }
             }
 
+            telemetry.addData("CurrentDraw", mRobot.mLift.getCurrentDraw());
+            telemetry.addData("LastGoodState", mRobot.mLift.lastLiftStateThatWasGood());
+
             telemetry.addData("Lift Position", mRobot.mLift.currentLiftPosition());
 
             telemetry.addData("Current Intake State", mRobot.mIntake.getCurrentIntakeState());
@@ -141,6 +154,7 @@ public class TeleOperate extends LinearOpMode{
 
             telemetry.addData("Current Lift Claw State", mRobot.mLift.getCurrentClawState());
             telemetry.addData("Requested Lift Claw State", mRobot.mLift.RequestedClawState);
+
 
             telemetry.update();
         }

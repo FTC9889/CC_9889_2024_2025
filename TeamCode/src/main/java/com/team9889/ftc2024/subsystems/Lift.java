@@ -1,8 +1,11 @@
 package com.team9889.ftc2024.subsystems;
 
 
+import static com.team9889.ftc2024.subsystems.Lift.LiftState.INTAKE_POSITION;
+
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,16 +17,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
+@Config
 public class Lift {
     DcMotorEx liftMotorR, liftMotorL, liftMotor3;
     Servo elbowR, elbowL, wrist, claw;
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
-    double lift_kp = 2;
+    public static double lift_kp = 0.02;
     double lift_kd = 0.02;
 
-    private LiftState CurrentLiftState = LiftState.NULL;
+    public LiftState CurrentLiftState = LiftState.NULL;
     public LiftState RequestedLiftState = LiftState.NULL;
 
     private ElbowStates CurrentElbowState = ElbowStates.NULL;
@@ -68,14 +74,14 @@ public class Lift {
         NULL(0),
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
-        LOW_RUNG_POSITION(86),
-        HIGH_RUNG_POSITION(309),
-        HIGH_RUNG_RELEASED_POSITION(152 + 76),
-        HIGH_RUNG_SCORE_POSITION(152 + 76),
-        LOW_BASKET_POSITION(231 + 76),
-        HIGH_BASKET_POSITION(632 + 76),
+        LOW_RUNG_POSITION(180),
+        HIGH_RUNG_POSITION(648),
+        HIGH_RUNG_RELEASED_POSITION(478),
+        HIGH_RUNG_SCORE_POSITION(478),
+        LOW_BASKET_POSITION(644),
+        HIGH_BASKET_POSITION(1485 - 7),
         HUMAN_PLAYER_POSITION(0),
-        LEVEL_ONE_ASSENT_POSITION(161 + 76),
+        LEVEL_ONE_ASSENT_POSITION(497),
         TRANSFER_POSITION(0);
 
         private final int value;
@@ -285,6 +291,15 @@ public class Lift {
         }
     }
 
+    private LiftState lastGoodState = INTAKE_POSITION;
+    public LiftState lastLiftStateThatWasGood(){
+        return lastGoodState;
+    }
+
+    public double getCurrentDraw() {
+        return liftMotorR.getCurrent(CurrentUnit.MILLIAMPS) + liftMotorL.getCurrent(CurrentUnit.MILLIAMPS);
+    }
+
     private int offset = 0;
     public int currentLiftPosition(){
         return -(liftMotorR.getCurrentPosition() - offset);
@@ -432,6 +447,9 @@ public class Lift {
     public class LiftControl implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if (RequestedLiftState == CurrentLiftState)
+                lastGoodState = CurrentLiftState;
+
             double power;
             double error = liftTargetPosition - currentLiftPosition();
             if(liftTargetPosition != 0) {
@@ -440,6 +458,11 @@ public class Lift {
                 power = Math.min(power, 1);
 
                 setLiftMotorPower(power);
+
+                if(getCurrentDraw() > 10000 && power < -0.8) {
+                    setRequestedLiftState(lastGoodState);
+                    CurrentLiftState = INTAKE_POSITION;
+                }
 
                 // Reset Timer
                 if (liftTimer == null) {
@@ -511,7 +534,7 @@ public class Lift {
     }
 
     public Action TransferPrepare(){
-        return new requestState(LiftState.INTAKE_POSITION, ElbowStates.INTAKE_POSITION, WristState.INTAKE_POSITION, ClawStates.OPEN_POSITION);
+        return new requestState(INTAKE_POSITION, ElbowStates.INTAKE_POSITION, WristState.INTAKE_POSITION, ClawStates.OPEN_POSITION);
     }
 
     public Action TransferReady(){

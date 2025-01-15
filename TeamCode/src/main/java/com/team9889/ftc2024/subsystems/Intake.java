@@ -166,7 +166,8 @@ public class Intake {
         ON(-1),
         OFF(0),
         SLOW(-0.15),
-        OUTTAKE(-0.5),
+        OUTTAKE(0.5),
+        SLOWOUTTAKE(0.1),
         NULL(0);
 
         private final double value;
@@ -289,16 +290,32 @@ public class Intake {
 
             // Wrist Control
             if (RequstedWristState != CurrentWristState) {
-                setWristPosition(RequstedWristState.getTargetPosition());
-
                 if(!resetWristTimer) {
                     wristTimer.reset();
                     resetWristTimer = true;
                 }
 
-                if(wristTimer.milliseconds() > 500) {
-                    CurrentWristState = RequstedWristState;
+                if(RequestedIntakeState == IntakeState.INTAKE) {
+                    if (extension.getCurrentPosition() < 100) {
+                        setWristPosition(WristState.MIDDLE_POSITION.getTargetPosition());
+                        CurrentWristState = WristState.MIDDLE_POSITION;
+                    } else {
+                        setWristPosition(RequstedWristState.getTargetPosition());
+                        if(wristTimer.milliseconds() > 500) {
+                            CurrentWristState = RequstedWristState;
+                        }
+                    }
+                } else {
+                    setWristPosition(RequstedWristState.getTargetPosition());
+
+                    if(wristTimer.milliseconds() > 500) {
+                        CurrentWristState = RequstedWristState;
+                    }
                 }
+
+
+
+
             } else {
                 resetWristTimer = false;
             }
@@ -326,7 +343,7 @@ public class Intake {
                     if (extension.getCurrentPosition() < 100){
                         extension.setPower(-0.3);
                         setRequstedWristState(WristState.UP_POSITION);
-                        setRequstedPowerState(PowerState.OUTTAKE);
+                        setRequstedPowerState(PowerState.SLOWOUTTAKE);
                     }else {
                         extension.setPower(-1);
                         setRequstedWristState(WristState.MIDDLE_POSITION);
@@ -407,12 +424,16 @@ public class Intake {
         return new requestState(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
     }
 
+    public Action Outtake() {
+        return new requestState(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, CurrentSampleColor);
+    }
+
     public Action Retracted() {
         return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.SLOW, CurrentSampleColor);
     }
 
     public Action AutoSamples() {
-        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 200);
     }
 
     public Action AutoSpecimenSamples() {

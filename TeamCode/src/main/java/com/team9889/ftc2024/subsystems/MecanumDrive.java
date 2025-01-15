@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package com.team9889.ftc2024.subsystems;
 
 import androidx.annotation.NonNull;
 
@@ -41,6 +41,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.Drawing;
+import org.firstinspires.ftc.teamcode.Localizer;
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
@@ -63,7 +65,8 @@ public class MecanumDrive {
 
         // drive model parameters
         public double inPerTick = 1; // If you're using OTOS/Pinpoint leave this at 1 (all values will be in inches, 1 tick = 1 inch)
-        public double lateralInPerTick = inPerTick; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
+//        public double lateralInPerTick = 0.3214277809754672; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
+        public double lateralInPerTick = 0.25; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
         //        public double trackWidthTicks = 0;
 
         public static final double MAX_RPM = 312;
@@ -74,13 +77,15 @@ public class MecanumDrive {
         }
 
         // feedforward parameters (in tick units)
-        public double kS = 0;
-        public static double kV = 1.0 / rpmToVelocity(MAX_RPM);
-        public double kA = 0;
+//        public double kS = 1.506709284361106;
+//        public static double kV = 0.1373717567069696;
+        public double kS = 1.993475167587293;
+        public static double kV = 0.07;
+        public double kA = 0.065;
 
         // path profile parameters (in inches)
         public double maxWheelVel = 56.85;
-        public double minProfileAccel = -56.85;
+        public double minProfileAccel = -40;
         public double maxProfileAccel = 56.85;
 
         // turn profile parameters (in radians)
@@ -88,19 +93,19 @@ public class MecanumDrive {
         public double maxAngAccel = Math.toRadians(283);
 
         // path controller gains
-        public double axialGain = 0.0;
-        public double lateralGain = 0.0;
-        public double headingGain = 0.0; // shared with turn
+        public double axialGain = 4.0;
+        public double lateralGain = 5.0;
+        public double headingGain = 3.0; // shared with turn
 
-        public double axialVelGain = 0.0;
-        public double lateralVelGain = 0.0;
-        public double headingVelGain = 0.0; // shared with turn
+        public double axialVelGain = 1.5;
+        public double lateralVelGain = 1.5;
+        public double headingVelGain = 1.5; // shared with turn
     }
 
     public static Params PARAMS = new Params();
 
     public final MecanumKinematics kinematics = new MecanumKinematics(
-            11.5, PARAMS.inPerTick / PARAMS.lateralInPerTick);
+            21.5, PARAMS.inPerTick / PARAMS.lateralInPerTick);
 
     public final TurnConstraints defaultTurnConstraints = new TurnConstraints(
             PARAMS.maxAngVel, -PARAMS.maxAngAccel, PARAMS.maxAngAccel);

@@ -7,10 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.team9889.ftc2024.subsystems.PinpointDrive;
 import com.team9889.ftc2024.subsystems.SparkFunOTOSDrive;
 
-import org.firstinspires.ftc.teamcode.MecanumDrive;
-
-import org.firstinspires.ftc.teamcode.TankDrive;
-
 public final class SplineTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -33,7 +29,7 @@ public final class SplineTest extends LinearOpMode {
             Actions.runBlocking(
                     drive.actionBuilder(beginPose)
                             .splineTo(new Vector2d(30, 30), Math.PI / 2)
-                            .splineTo(new Vector2d(0, 60), Math.PI)
+                            .splineTo(new Vector2d(30, 60), Math.PI /2 )
                             .build());
         }else {
             throw new RuntimeException();

@@ -5,6 +5,12 @@ package com.team9889.ftc2024.subsystems;
 import static com.acmerobotics.roadrunner.ftc.OTOSKt.OTOSPoseToRRPose;
 import static com.acmerobotics.roadrunner.ftc.OTOSKt.RRPoseToOTOSPose;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -13,8 +19,12 @@ import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.SparkFunOTOSCorrected;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Drawing;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 
 /**
@@ -143,5 +153,53 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         return new PoseVelocity2d(new Vector2d(otosVel.x, otosVel.y),otosVel.h);
     }
 
+    @Config
+    public class DriveToPoint implements Action {
+
+        Pose2d target;
+
+        public DriveToPoint(Pose2d pose) {
+            this.target = pose;
+        }
+
+        PIDCoefficients xyPID = new PIDCoefficients(3, 0, 0.4);
+        PIDCoefficients headingPID = new PIDCoefficients(3, 0, 0);
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket p) {
+            Vector2d error = new Vector2d(target.position.x - pose.position.x, target.position.y - pose.position.y);
+            double heading_error = target.heading.toDouble() - pose.heading.toDouble();
+
+            setPower(error.x * xyPID.p, error.y * xyPID.p, heading_error * headingPID.p);
+
+            Canvas c = p.fieldOverlay();
+            p.put("x", pose.position.x);
+            p.put("y", pose.position.y);
+            p.put("xe", error.x);
+            p.put("ye", error.y);
+            p.put("heading (deg)", Math.toDegrees(pose.heading.toDouble()));
+            c.setStroke("#3F51B5");
+            Drawing.drawRobot(c, pose);
+
+            return Math.abs(error.x) < 2 && Math.abs(error.y) < 2 && Math.abs(heading_error) < 3;
+        }
+
+        private void setPower(double x_, double y_, double heading_) {
+            double y = x_; // Remember, Y stick value is reversed
+            double x = y_;
+
+            double botHeading = pose.heading.toDouble();
+
+            // Rotate the movement direction counter to the bot's rotation
+            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+            setDrivePowers(new PoseVelocity2d(new Vector2d(rotY, rotX), heading_));
+        }
+    }
+
+    public Action DriveToPoint(Pose2d pose2d) {
+        return new DriveToPoint(pose);
+    }
 
 }

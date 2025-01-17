@@ -38,6 +38,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -290,6 +292,8 @@ public class MecanumDrive {
             }
         }
 
+        ElapsedTime timer = new ElapsedTime();
+
         @Override
         public boolean run(@NonNull TelemetryPacket p) {
             double t;
@@ -361,7 +365,9 @@ public class MecanumDrive {
             c.setStroke("#4CAF50FF");
             c.setStrokeWidth(1);
             c.strokePolyline(xPoints, yPoints);
+            RobotLog.d("Loop Hz: " + 1000/(timer.milliseconds() + 0.1));
 
+            timer.reset();
             return true;
         }
 

@@ -1,4 +1,4 @@
-package com.team9889.ftc2024.opmode;
+package com.team9889.ftc2024.test;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

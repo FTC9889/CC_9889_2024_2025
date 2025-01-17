@@ -246,17 +246,25 @@ public class Intake {
         }
     }
 
+    double intakePower = 2;
     public void setIntakePower(double power){
-        intakeL.setPower(power);
-        intakeR.setPower(power);
+        if (intakePower != power) {
+            intakeL.setPower(power);
+            intakeR.setPower(power);
+        }
+        intakePower = power;
         if(power == PowerState.OFF.value) {
             CurrentPowerState = PowerState.OFF;
         }
     }
 
+    double wristPosition = 2;
     private void setWristPosition(double position){
-        intakeWristR.setPosition(position);
-        intakeWristL.setPosition(position);
+        if(wristPosition != position) {
+            intakeWristR.setPosition(position);
+            intakeWristL.setPosition(position);
+        }
+        wristPosition = position;
     }
 
     private class requestState implements Action {

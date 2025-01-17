@@ -107,10 +107,6 @@ public class Drive {
     GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
     double oldTime = 0;
 
-
-
-
-
     public void telemetry (Telemetry telemetry){
         telemetry.addData("Status", "Initialized");
         telemetry.addData("X offset", odo.getXOffset());

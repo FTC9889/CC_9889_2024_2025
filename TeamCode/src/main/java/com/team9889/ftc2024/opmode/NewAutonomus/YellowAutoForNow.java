@@ -111,12 +111,13 @@ public class YellowAutoForNow extends LinearOpMode {
         Actions.runBlocking(new ParallelAction(
                 new SequentialAction(
                         new InstantAction(() -> {
+                            mRobot.mIntake.setIntakePower(Intake.PowerState.ON.setTargetPower());
                             mRobot.mIntake.setIntakeLockPosition(1);
                         }),
                         new SleepAction(0.25),
-                        mRobot.mIntake.AutoSamples(577),
+                        mRobot.mIntake.AutoSamples(530),
                         new SleepAction(0.5),
-                        mRobot.mIntake.AutoSamples(430),
+                        mRobot.mIntake.AutoSamples(400),
                         new SleepAction(0.5)
                 ))
         );
@@ -151,6 +152,7 @@ public class YellowAutoForNow extends LinearOpMode {
                 }),
 
                 mRobot.mDrive.DriveY(54, new Vector2d(-0.3, 0)),
+                new SleepAction(0.5),
                 mRobot.mLift.scoreHigh()
         ));
         angle = -84;
@@ -162,6 +164,7 @@ public class YellowAutoForNow extends LinearOpMode {
         Actions.runBlocking(new ParallelAction(
                 new SequentialAction(
                         new InstantAction(() -> {
+                            mRobot.mIntake.setIntakePower(Intake.PowerState.ON.setTargetPower());
                             mRobot.mIntake.setIntakeLockPosition(1);
                         }),
                         new SleepAction(0.25),

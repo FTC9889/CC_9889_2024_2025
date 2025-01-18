@@ -313,6 +313,8 @@ public class Intake {
                             CurrentWristState = RequstedWristState;
                         }
                     }
+                } else if (RequestedIntakeState == IntakeState.AUTO_EXTEND && CurrentIntakeState != IntakeState.AUTO_EXTEND) {
+                    setWristPosition(RequstedWristState.getTargetPosition()-0.03);
                 } else {
                     setWristPosition(RequstedWristState.getTargetPosition());
 
@@ -365,7 +367,7 @@ public class Intake {
                 } else {
                     extension.setTargetPosition(target);
                     extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    extension.setPower(0.8);
+                    extension.setPower(0.6);
                 }
 
                 if (Math.abs(extension.getCurrentPosition() - target) < 20) {
@@ -374,6 +376,7 @@ public class Intake {
                     extension.setPower(0);
                     CurrentIntakeState = RequestedIntakeState;
                 }
+
             } else {
                 lockTimer3.reset();
             }

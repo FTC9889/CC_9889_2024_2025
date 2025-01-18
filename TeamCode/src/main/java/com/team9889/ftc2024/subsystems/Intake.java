@@ -27,13 +27,13 @@ public class Intake {
     public DigitalChannel magnetSensor;
     public RevColorSensorV3 colorSensor;
 
-    private IntakeState CurrentIntakeState = IntakeState.NULL;
+    public IntakeState CurrentIntakeState = IntakeState.NULL;
     public IntakeState RequestedIntakeState = IntakeState.NULL;
 
-    private  WristState CurrentWristState = WristState.NULL;
+    public  WristState CurrentWristState = WristState.NULL;
     public   WristState RequstedWristState = WristState.NULL;
 
-    private  PowerState CurrentPowerState = PowerState.NULL;
+    public  PowerState CurrentPowerState = PowerState.NULL;
     public   PowerState RequstedPowerState = PowerState.NULL;
 
     private  SampleColor CurrentSampleColor = SampleColor.NULL;
@@ -367,10 +367,10 @@ public class Intake {
                 } else {
                     extension.setTargetPosition(target);
                     extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    extension.setPower(0.6);
+                    extension.setPower(0.8);
                 }
 
-                if (Math.abs(extension.getCurrentPosition() - target) < 20) {
+                if (Math.abs(extension.getCurrentPosition() - target) < 40) {
                     extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     extension.setTargetPosition(target);
                     extension.setPower(0);

@@ -17,7 +17,7 @@ import com.team9889.ftc2024.subsystems.Lift;
 import com.team9889.ftc2024.subsystems.Robot;
 import com.team9889.ftc2024.subsystems.SparkFunOTOSDrive;
 
-@Autonomous
+@Autonomous(preselectTeleOp = "TeleOperate")
 public class YellowAutoForNow extends LinearOpMode {
     Robot mRobot = new Robot();
 
@@ -35,7 +35,7 @@ public class YellowAutoForNow extends LinearOpMode {
         mRobot.mIntake.setRequstedPowerState(Intake.PowerState.ON);
 
         Actions.runBlocking(new SequentialAction(
-                mRobot.mDrive.DriveYLess(58.5, new Vector2d(0, 0.4)),
+                mRobot.mDrive.DriveYLess(56, new Vector2d(0, 0.4)),
                 mRobot.mDrive.DriveX(50, new Vector2d(-0.4, 0)),
                 mRobot.mDrive.DriveX(54, new Vector2d(-0.3, 0)),
                 mRobot.mDrive.Rotate1(-100, 1),
@@ -44,7 +44,7 @@ public class YellowAutoForNow extends LinearOpMode {
                 mRobot.mLift.scoreHigh())
         );
 
-        Actions.runBlocking(mRobot.mDrive.DriveYLess(55, new Vector2d(0.3,0)));
+        Actions.runBlocking(mRobot.mDrive.DriveYLess(53, new Vector2d(0.3,0)));
 
         Actions.runBlocking(new ParallelAction(
                 mRobot.mLift.liftRetract(),
@@ -153,9 +153,14 @@ public class YellowAutoForNow extends LinearOpMode {
 
                 mRobot.mDrive.DriveY(54, new Vector2d(-0.3, 0)),
                 new SleepAction(0.5),
+                new InstantAction(() -> {
+                    mRobot.mLift.setWristPosition(0.6);
+                }),
+                mRobot.mDrive.DriveX(65   , new Vector2d(0, 0.3)),
                 mRobot.mLift.scoreHigh()
+
         ));
-        angle = -84;
+        angle = -81.5;
         Actions.runBlocking(new SequentialAction(
                         mRobot.mDrive.Rotate1(angle, 0.4),
                         mRobot.mLift.liftRetract()
@@ -219,9 +224,9 @@ public class YellowAutoForNow extends LinearOpMode {
                                 ),
                                 new SequentialAction(
                                         new InstantAction(() -> {
-                                            mRobot.mFlag.setFlagPosition(0.45);
+                                            mRobot.mFlag.setFlagPosition(0.55);
                                             mRobot.mIntake.setIntakeLockPosition(1);
-                                            mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(0.8, 0), -0.2));
+                                            mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(1, 0), -0.15));
                                         }),
                                         new SleepAction(1.35),
                                         new InstantAction(() -> {mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));}))

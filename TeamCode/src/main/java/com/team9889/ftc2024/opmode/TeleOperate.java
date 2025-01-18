@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.team9889.ftc2024.subsystems.Intake;
 import com.team9889.ftc2024.subsystems.Lift;
 import com.team9889.ftc2024.subsystems.Robot;
@@ -53,45 +54,55 @@ public class TeleOperate extends LinearOpMode{
                 opponentColor = Intake.SampleColor.BLUE;
             }
 
-            if (!press && gamepad2.y && gamepad2.back){
-                yellow = !yellow;
-                press = true;
-            } else
-                press = false;
-
-            if (!yellow) {
-                mRobot.mFlag.setFlagPosition(0.85);
+            if (gamepad2.dpad_up){
+                yellow = false;
+            } else if (gamepad2.dpad_down) {
+                yellow = true;
             }else {
-                mRobot.mFlag.setFlagPosition(0.9);
+
+            }
+
+            if (gamepad1.dpad_up){
+                mRobot.mFlag.setFlagPosition(0.55);
+            }else {
+                if (!yellow) {
+                    mRobot.mFlag.setFlagPosition(0.85);
+                } else {
+                    mRobot.mFlag.setFlagPosition(0.9);
+                }
             }
 
             // Send calculated power to wheels
             mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(-gamepad1.left_stick_y, -gamepad1.left_stick_x), -gamepad1.right_stick_x));
 
-            if (mRobot.mIntake.allowDriverExtension()){
+            if (mRobot.mIntake.allowDriverExtension() || gamepad1.dpad_left){
                 if(Math.abs(gamepad1.right_trigger) > Math.abs(gamepad1.left_trigger))
                     mRobot.mIntake.setExtensionPower(gamepad1.right_trigger);
                 else if(Math.abs(gamepad1.right_trigger) < Math.abs(gamepad1.left_trigger))
                     mRobot.mIntake.setExtensionPower(-gamepad1.left_trigger);
                 else
                     mRobot.mIntake.setExtensionPower(0);
+
+                if (gamepad1.dpad_left) {
+                    mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.NULL;
+                    mRobot.mIntake.CurrentWristState =Intake.WristState.NULL;
+                    mRobot.mIntake.CurrentPowerState = Intake.PowerState.NULL;
+                    intakeAction = mRobot.mIntake.Retracted();
+                }
             }
 
-            if (gamepad1.a) {
-                intakeAction = mRobot.mIntake.Deployed();
-                liftAction = mRobot.mLift.TransferPrepare();
-            } else if (gamepad1.b) {
-                intakeAction = mRobot.mIntake.Retracted();
-                score = false;
-            }
+
 
             if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
                 if (mRobot.mIntake.getIntakeColor() == allianceColor ||
                         (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && yellow)) {
+                    if (mRobot.mIntake.magnetSensor.getState()){
+                        intakeAction = mRobot.mIntake.Retracted();
+                        sampleInRobot = true;
+                        score = false;
+                    }
 
-                    intakeAction = mRobot.mIntake.Retracted();
-                    sampleInRobot = true;
-                    score = false;
+
                 }
 
                 if ((((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
@@ -194,6 +205,16 @@ public class TeleOperate extends LinearOpMode{
                 liftAction = mRobot.mLift.TransferPrepare();
             }
 
+            if (gamepad1.a) {
+                intakeAction = mRobot.mIntake.Deployed();
+                liftAction = mRobot.mLift.TransferPrepare();
+                mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
+                mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
+                mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
+            } else if (gamepad1.b) {
+                intakeAction = mRobot.mIntake.Retracted();
+                score = false;
+            }
 
             List<Action> newActions = new ArrayList<>();
             for (Action action : requestedActions) {
@@ -252,6 +273,9 @@ public class TeleOperate extends LinearOpMode{
 
 
             telemetry.update();
+
+            mRobot.mLift.setWristPosition(mRobot.mLift.RequestedWristState.getTargetPosition());
+
         }
     }
 }

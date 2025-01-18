@@ -275,10 +275,10 @@ public class Lift {
 
     double wristPosition = 2;
     public void setWristPosition(double position){
-        if(wristPosition != position)
+//        if(wristPosition != position)
             wrist.setPosition(position);
 
-        wristPosition = position;
+//        wristPosition = position;
     }
 
     double clawPosition = 2;
@@ -401,8 +401,9 @@ public class Lift {
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            setWristPosition(RequestedWristState.getTargetPosition());
+
             if (RequestedWristState != CurrentWristState) {
-                setWristPosition(RequestedWristState.getTargetPosition());
 
                 if (resetWristTimer) {
                     wristTimer.reset();
@@ -416,6 +417,8 @@ public class Lift {
             } else {
                 resetWristTimer = true;
             }
+
+            RobotLog.d("Timer: "+ wristTimer.seconds());
 
 
             if (RequestedElbowState != CurrentElbowState) {

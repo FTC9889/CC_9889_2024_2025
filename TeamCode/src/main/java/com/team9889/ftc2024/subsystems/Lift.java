@@ -76,8 +76,8 @@ public class Lift {
         DEFAULT_POSITION(0),
         LOW_RUNG_POSITION(180),
         HIGH_RUNG_POSITION(700),
-        HIGH_RUNG_RELEASED_POSITION(478),
-        HIGH_RUNG_SCORE_POSITION(478),
+        HIGH_RUNG_RELEASED_POSITION(500),
+        HIGH_RUNG_SCORE_POSITION(500),
         LOW_BASKET_POSITION(644),
         HIGH_BASKET_POSITION(1485 - 7),
         HUMAN_PLAYER_POSITION(0),
@@ -496,7 +496,7 @@ public class Lift {
                 if(currentLiftPosition() > 200) {
                     power = -1;
                 } else {
-                    power = -0.3;
+                    power = -0.5;
                 }
 
                 setLiftMotorPower(power);
@@ -576,5 +576,101 @@ public class Lift {
 
     public Action AutoDrop(){
         return new requestState(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.OPEN_POSITION);
+    }
+
+    public class waitForFinish implements Action {
+        LiftState liftState; ElbowStates elbowState; WristState wristState; ClawStates clawState;
+        public waitForFinish(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
+            this.liftState = liftState;
+            this.elbowState = elbowState;
+            this.wristState = wristState;
+            this.clawState = clawState;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            return !inStates(liftState, elbowState, wristState, clawState);
+        }
+    }
+
+    public Action waitForLiftUp() {
+        return new waitForFinish(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION);
+    }
+
+
+    ElapsedTime timer = new ElapsedTime();
+    boolean time = false;
+    public class ScoreHigh implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            double error = LiftState.HIGH_BASKET_POSITION.getTargetPosition() - currentLiftPosition();
+
+            double power = lift_kp * error;
+            power = Math.min(power, 1);
+
+            setLiftMotorPower(power);
+
+
+
+            if(Math.abs(error) < 50) {
+                if(!time)
+                    timer.reset();
+
+                setClawPosition(ClawStates.OPEN_POSITION.getTargetPosition());
+                setElbowPosition(ElbowStates.BASKET_SCORE_READY_POSITION.getTargetPosition());
+                setWristPosition(WristState.BASKET_SCORE_READY_POSITION.getTargetPosition());
+                 time = true;
+            } else if (Math.abs(error) < 100) {
+                setClawPosition(ClawStates.CLOSED_POSITION.getTargetPosition());
+                setElbowPosition(ElbowStates.BASKET_SCORE_READY_POSITION.getTargetPosition());
+                setWristPosition(WristState.BASKET_SCORE_READY_POSITION.getTargetPosition());
+            } else {
+                setClawPosition(ClawStates.CLOSED_POSITION.getTargetPosition());
+                setElbowPosition(ElbowStates.DEFAULT_POSITION.getTargetPosition());
+                setWristPosition(WristState.DEFAULT_POSITION.getTargetPosition());
+                time = false;
+            }
+
+            if(time && timer.milliseconds() > 750)
+                return false;
+            else
+                return true;
+        }
+    }
+
+
+
+
+    public Action scoreHigh() {
+        return new ScoreHigh();
+    }
+
+
+    public class LiftDown implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            double power;
+
+            if(currentLiftPosition() > 200) {
+                power = -1;
+            } else {
+                power = -0.4;
+            }
+
+            setLiftMotorPower(power);
+
+            setElbowPosition(ElbowStates.DEFAULT_POSITION.getTargetPosition());
+            setWristPosition(WristState.DEFAULT_POSITION.getTargetPosition());
+
+            if(!liftMagnetSensor.getState()) {
+                setLiftMotorPower(0);
+                return false;
+            } else
+                return true;
+        }
+    }
+
+    public Action liftRetract() {
+        return new LiftDown();
     }
 }

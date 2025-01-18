@@ -320,10 +320,6 @@ public class Intake {
                         CurrentWristState = RequstedWristState;
                     }
                 }
-
-
-
-
             } else {
                 resetWristTimer = false;
             }
@@ -340,6 +336,9 @@ public class Intake {
 
             // Retracted
             if (RequestedIntakeState == IntakeState.RETRACTED){
+                if(extension.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
+                    extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
                 if (!magnetSensor.getState()) {
                     setExtensionLockPosition(closedPosition);
                     extension.setPower(0);
@@ -349,9 +348,9 @@ public class Intake {
                     setExtensionLockPosition(openPosition);
 
                     if (extension.getCurrentPosition() < 100){
-                        extension.setPower(-0.3);
+                        extension.setPower(-0.5);
                         setRequstedWristState(WristState.UP_POSITION);
-                        setRequstedPowerState(PowerState.SLOWOUTTAKE);
+                        setRequstedPowerState(PowerState.ON);
                     }else {
                         extension.setPower(-1);
                         setRequstedWristState(WristState.MIDDLE_POSITION);
@@ -364,12 +363,12 @@ public class Intake {
                 if (lockTimer3.milliseconds() < 50) {
                     setExtensionLockPosition(openPosition);
                 } else {
-                    extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     extension.setTargetPosition(target);
-                    extension.setPower(1);
+                    extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    extension.setPower(0.8);
                 }
 
-                if (Math.abs(extension.getCurrentPosition() - target) < 10) {
+                if (Math.abs(extension.getCurrentPosition() - target) < 20) {
                     extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     extension.setTargetPosition(target);
                     extension.setPower(0);
@@ -423,6 +422,32 @@ public class Intake {
         }
     }
 
+    public class WaitForSample implements Action {
+
+        double seconds = 0;
+
+        public WaitForSample(double seconds) {
+            this.seconds = seconds;
+        }
+        boolean first = true;
+        ElapsedTime timer = new ElapsedTime();
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            if(first) {
+                timer.reset();
+                first = false;
+            } else {
+                return getIntakeColor() != Intake.SampleColor.NEUTRAL || timer.seconds() < seconds;
+            }
+
+            return true;
+        }
+    }
+
+    public Action WaitForSample(double seconds) {
+        return new WaitForSample(seconds);
+    }
+
     private boolean allowDriverExtension = false;
     public boolean allowDriverExtension(){
         return allowDriverExtension;
@@ -440,12 +465,36 @@ public class Intake {
         return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.SLOW, CurrentSampleColor);
     }
 
+    public Action AutoSamples(int target) {
+        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, target);
+    }
+
     public Action AutoSamples() {
-        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 200);
+        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 560);
     }
 
     public Action AutoSpecimenSamples() {
         return new requestState(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+    }
+
+    public Action InspectionExtend() {
+        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.OFF, CurrentSampleColor, 577);
+    }
+
+    private boolean waitForFinish(IntakeState intakeState, WristState wristState, PowerState powerState) {
+        return getCurrentIntakeState() == intakeState && getCurrentWristState() == wristState && getCurrentPowerState() == powerState;
+    }
+
+    public class WaitForRetract implements Action {
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            return extension.getCurrentPosition() > 20;
+        }
+    }
+
+    public Action waitForRetract() {
+        return new WaitForRetract();
     }
 }
 

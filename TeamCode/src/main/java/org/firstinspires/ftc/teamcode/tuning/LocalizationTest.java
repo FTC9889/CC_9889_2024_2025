@@ -22,19 +22,21 @@ public class LocalizationTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            drive.setDrivePowers(new PoseVelocity2d(
-                    new Vector2d(
-                            -gamepad1.left_stick_y,
-                            -gamepad1.left_stick_x
-                    ),
+            PoseVelocity2d velocity2d = new PoseVelocity2d(
+                    new Vector2d(-gamepad1.left_stick_y,-gamepad1.left_stick_x),
                     -gamepad1.right_stick_x
-            ));
+            );
+
+            drive.setDrivePowers(velocity2d);
 
             drive.updatePoseEstimate();
 
             telemetry.addData("x", drive.pose.position.x);
             telemetry.addData("y", drive.pose.position.y);
             telemetry.addData("heading (deg)", Math.toDegrees(drive.pose.heading.toDouble()));
+            telemetry.addData("vX", velocity2d.linearVel.x);
+            telemetry.addData("vY", velocity2d.linearVel.y);
+            telemetry.addData("vA", velocity2d.angVel);
             telemetry.update();
 
             TelemetryPacket packet = new TelemetryPacket();

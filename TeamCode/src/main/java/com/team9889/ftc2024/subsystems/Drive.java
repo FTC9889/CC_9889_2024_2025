@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 import java.util.Locale;
 
+@Deprecated
 public class Drive {
     DcMotor leftFront,leftBack, rightFront, rightBack;
     public RevIMU imu;

@@ -5,8 +5,18 @@ package com.team9889.ftc2024.subsystems;
 import static com.acmerobotics.roadrunner.ftc.OTOSKt.OTOSPoseToRRPose;
 import static com.acmerobotics.roadrunner.ftc.OTOSKt.RRPoseToOTOSPose;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
+import static java.lang.Math.hypot;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
+
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -18,14 +28,21 @@ import com.acmerobotics.roadrunner.ftc.DownsampledWriter;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.SparkFunOTOSCorrected;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.team9889.lib.CruiseLib;
+import com.team9889.lib.Pose;
+import com.team9889.lib.control.controllers.PID;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Drawing;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
+
+import java.util.ArrayList;
 
 /**
  * Experimental extension of MecanumDrive that uses the SparkFun OTOS sensor for localization.
@@ -49,7 +66,7 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
 
         // RR localizer note: These units are inches and radians.
-        public SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(2.1146, 2.9556, Math.toRadians(-180));
+        public SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(2.1146, 2.9556, Math.toRadians(180));
 
         // Here we can set the linear and angular scalars, which can compensate for
         // scaling issues with the sensor measurements. Note that as of firmware
@@ -67,7 +84,8 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        public double linearScalar = 1.17039509;
+//        public double linearScalar = 1.17039509;
+        public double linearScalar = 1.05;
         public double angularScalar = 0.9961;
     }
 
@@ -113,18 +131,21 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         System.out.println(otos.calibrateImu(255, true));
         System.out.println("OTOS calibration complete!");
     }
+
+    double xVel, yVel, thetaVel;
+
     @Override
     public PoseVelocity2d updatePoseEstimate() {
-        if (lastOtosPose != pose) {
-            // RR localizer note:
-            // Something else is modifying our pose (likely for relocalization),
-            // so we override otos pose with the new pose.
-            // This could potentially cause up to 1 loop worth of drift.
-            // I don't like this solution at all, but it preserves compatibility.
-            // The only alternative is to add getter and setters, but that breaks compat.
-            // Potential alternate solution: timestamp the pose set and backtrack it based on speed?
-            otos.setPosition(RRPoseToOTOSPose(pose));
-        }
+//        if (lastOtosPose != pose) {
+//            // RR localizer note:
+//            // Something else is modifying our pose (likely for relocalization),
+//            // so we override otos pose with the new pose.
+//            // This could potentially cause up to 1 loop worth of drift.
+//            // I don't like this solution at all, but it preserves compatibility.
+//            // The only alternative is to add getter and setters, but that breaks compat.
+//            // Potential alternate solution: timestamp the pose set and backtrack it based on speed?
+//            otos.setPosition(RRPoseToOTOSPose(pose));
+//        }
         // RR localizer note:
         // The values are passed by reference, so we create variables first,
         // then pass them into the function, then read from them.
@@ -140,6 +161,10 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         pose = OTOSPoseToRRPose(otosPose);
         lastOtosPose = pose;
 
+        xVel = otosVel.x;
+        yVel = otosVel.y;
+        thetaVel = otosVel.h;
+
         // RR standard
         poseHistory.add(pose);
         while (poseHistory.size() > 100) {
@@ -153,53 +178,134 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         return new PoseVelocity2d(new Vector2d(otosVel.x, otosVel.y),otosVel.h);
     }
 
-    @Config
-    public class DriveToPoint implements Action {
-
-        Pose2d target;
-
-        public DriveToPoint(Pose2d pose) {
-            this.target = pose;
+    public class DriveX implements Action {
+        double x;
+        Vector2d speed;
+        public DriveX (double X, Vector2d speed) {
+            x = X;
+            this.speed = speed;
         }
-
-        PIDCoefficients xyPID = new PIDCoefficients(3, 0, 0.4);
-        PIDCoefficients headingPID = new PIDCoefficients(3, 0, 0);
 
         @Override
-        public boolean run(@NonNull TelemetryPacket p) {
-            Vector2d error = new Vector2d(target.position.x - pose.position.x, target.position.y - pose.position.y);
-            double heading_error = target.heading.toDouble() - pose.heading.toDouble();
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
 
-            setPower(error.x * xyPID.p, error.y * xyPID.p, heading_error * headingPID.p);
+            if(pose.position.x < x) {
+               setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
 
-            Canvas c = p.fieldOverlay();
-            p.put("x", pose.position.x);
-            p.put("y", pose.position.y);
-            p.put("xe", error.x);
-            p.put("ye", error.y);
-            p.put("heading (deg)", Math.toDegrees(pose.heading.toDouble()));
-            c.setStroke("#3F51B5");
-            Drawing.drawRobot(c, pose);
-
-            return Math.abs(error.x) < 2 && Math.abs(error.y) < 2 && Math.abs(heading_error) < 3;
-        }
-
-        private void setPower(double x_, double y_, double heading_) {
-            double y = x_; // Remember, Y stick value is reversed
-            double x = y_;
-
-            double botHeading = pose.heading.toDouble();
-
-            // Rotate the movement direction counter to the bot's rotation
-            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-            setDrivePowers(new PoseVelocity2d(new Vector2d(rotY, rotX), heading_));
+            return pose.position.x < x;
         }
     }
 
-    public Action DriveToPoint(Pose2d pose2d) {
-        return new DriveToPoint(pose);
+    public class DriveXLess implements Action {
+        double x;
+        Vector2d speed;
+        public DriveXLess (double X, Vector2d speed) {
+            x = X;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.x > x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.x > x;
+        }
     }
 
+    public Action DriveXLess(double x, Vector2d vector2d) {
+        return new DriveXLess(x, vector2d);
+    }
+
+    public Action DriveX(double x, Vector2d speed) {
+        return new DriveX(x, speed);
+    }
+
+    public class DriveY implements Action {
+        double x;
+        Vector2d speed;
+        public DriveY (double Y, Vector2d speed) {
+            x = Y;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.y < x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.y < x;
+        }
+    }
+
+    public Action DriveY(double x, Vector2d speed) {
+        return new DriveY(x, speed);
+    }
+
+    public class DriveYLess implements Action {
+        double x;
+        Vector2d speed;
+        public DriveYLess (double Y, Vector2d speed) {
+            x = Y;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.y > x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.y > x;
+        }
+    }
+
+    public Action DriveYLess(double y, Vector2d speed) {
+        return new DriveYLess(y, speed);
+    }
+
+
+    public class Rotate1 implements Action {
+        double angle;
+        double speed;
+        public Rotate1 (double angle, double speed) {
+            this.angle = angle;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            double error = angle - Math.toDegrees(pose.heading.toDouble());
+            setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), speed));
+
+            if(Math.abs(error) < 4)
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+
+            return Math.abs(error) > 4;
+        }
+    }
+
+    public Action Rotate1(double angle, double speed) {
+        return new Rotate1(angle, speed);
+    }
 }

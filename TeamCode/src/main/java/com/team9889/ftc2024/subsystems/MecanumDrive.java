@@ -71,13 +71,6 @@ public class MecanumDrive {
         public double lateralInPerTick = 0.25; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
         //        public double trackWidthTicks = 0;
 
-        public static final double MAX_RPM = 312;
-        public static double WHEEL_RADIUS = 2.047244094488189; // in
-        public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-        public static double rpmToVelocity(double rpm) {
-            return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
-        }
-
         // feedforward parameters (in tick units)
 //        public double kS = 1.506709284361106;
 //        public static double kV = 0.1373717567069696;

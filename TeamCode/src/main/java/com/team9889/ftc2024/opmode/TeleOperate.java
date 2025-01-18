@@ -21,6 +21,8 @@ public class TeleOperate extends LinearOpMode{
     boolean sampleInRobot = false;
     boolean something = false;
     boolean clawReleased = false;
+    boolean yellow = true;
+    boolean press = false;
     String color = "Nothing";
 
     Intake.SampleColor allianceColor = Intake.SampleColor.RED;
@@ -51,6 +53,18 @@ public class TeleOperate extends LinearOpMode{
                 opponentColor = Intake.SampleColor.BLUE;
             }
 
+            if (!press && gamepad2.y && gamepad2.back){
+                yellow = !yellow;
+                press = true;
+            } else
+                press = false;
+
+            if (!yellow) {
+                mRobot.mFlag.setFlagPosition(0.85);
+            }else {
+                mRobot.mFlag.setFlagPosition(0.9);
+            }
+
             // Send calculated power to wheels
             mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(-gamepad1.left_stick_y, -gamepad1.left_stick_x), -gamepad1.right_stick_x));
 
@@ -72,14 +86,16 @@ public class TeleOperate extends LinearOpMode{
             }
 
             if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
-                if (mRobot.mIntake.getIntakeColor() == allianceColor
-                        || mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL) {
+                if (mRobot.mIntake.getIntakeColor() == allianceColor ||
+                        (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && yellow)) {
+
                     intakeAction = mRobot.mIntake.Retracted();
                     sampleInRobot = true;
                     score = false;
                 }
 
-                if ((mRobot.mIntake.getIntakeColor() == opponentColor || gamepad1.y) && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION){
+                if ((((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
+                        && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION) || gamepad1.y) ){
                     intakeAction = mRobot.mIntake.Outtake();
                 }
             }
@@ -112,6 +128,9 @@ public class TeleOperate extends LinearOpMode{
                     intakeAction = mRobot.mIntake.Retracted();
                     sampleInRobot = false;
                 }
+
+                if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED)
+                    mRobot.mIntake.setIntakePower(0);
             }
 
             if(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION
@@ -127,6 +146,7 @@ public class TeleOperate extends LinearOpMode{
                             (mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION)
                         ||mRobot.mLift.inStates(Lift.LiftState.DEFAULT_POSITION, Lift.ElbowStates.DEFAULT_POSITION, Lift.WristState.DEFAULT_POSITION, Lift.ClawStates.CLOSED_POSITION)
                         || mRobot.mLift.inStates(Lift.LiftState.NULL, Lift.ElbowStates.NULL, Lift.WristState.NULL, Lift.ClawStates.NULL)
+                        || mRobot.mLift.inStates(Lift.LiftState.HUMAN_PLAYER_POSITION, Lift.ElbowStates.HUMAN_PLAYER_POSITION_2, Lift.WristState.HUMAN_PLAYER_POSITION_2, Lift.ClawStates.CLOSED_POSITION)
                     )
             ){
                 liftAction = mRobot.mLift.HumanPlayer();
@@ -145,6 +165,8 @@ public class TeleOperate extends LinearOpMode{
                     && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION){
                 liftAction = mRobot.mLift.HumanPlayerIntakedReady();
             }
+
+
 
             if (gamepad2.a && mRobot.mLift.inStates(Lift.LiftState.HUMAN_PLAYER_POSITION, Lift.ElbowStates.HUMAN_PLAYER_POSITION_2, Lift.WristState.HUMAN_PLAYER_POSITION_2, Lift.ClawStates.CLOSED_POSITION)) {
                 liftAction = mRobot.mLift.HighRung();

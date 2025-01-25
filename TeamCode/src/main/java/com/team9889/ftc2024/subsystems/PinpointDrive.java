@@ -40,8 +40,8 @@ public class PinpointDrive extends MecanumDrive {
          */
         //These are tuned for 3110-0002-0001 Product Insight #1
         // RR localizer note: These units are inches, presets are converted from mm (which is why they are inexact)
-        public double xOffset = 0.4764740157480315;
-        public double yOffset = 0.244246062992;
+        public double xOffset = 0.02166;
+        public double yOffset = -1.80918;
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
@@ -70,7 +70,7 @@ public class PinpointDrive extends MecanumDrive {
          replace "imu" with "pinpoint" or whatever your pinpoint is called in config.
          Note: Pinpoint IMU is always used for base localization
          */
-        public boolean usePinpointIMUForTuning = true;
+        public boolean usePinpointIMUForTuning = false;
     }
 
     public static Params PARAMS = new Params();
@@ -102,7 +102,7 @@ public class PinpointDrive extends MecanumDrive {
         This is recommended before you run your autonomous, as a bad initial calibration can cause
         an incorrect starting value for x, y, and heading.
          */
-        //pinpoint.recalibrateIMU();
+//        pinpoint.recalibrateIMU();
         pinpoint.resetPosAndIMU();
         // wait for pinpoint to finish calibrating
         try {

@@ -497,4 +497,136 @@ public class MecanumDrive {
                 defaultVelConstraint, defaultAccelConstraint
         );
     }
+
+
+    public class DriveX implements Action {
+        double x;
+        Vector2d speed;
+        public DriveX (double X, Vector2d speed) {
+            x = X;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.x < x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.x < x;
+        }
+    }
+
+    public class DriveXLess implements Action {
+        double x;
+        Vector2d speed;
+        public DriveXLess (double X, Vector2d speed) {
+            x = X;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.x > x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.x > x;
+        }
+    }
+
+    public Action DriveXLess(double x, Vector2d vector2d) {
+        return new DriveXLess(x, vector2d);
+    }
+
+    public Action DriveX(double x, Vector2d speed) {
+        return new DriveX(x, speed);
+    }
+
+    public class DriveY implements Action {
+        double x;
+        Vector2d speed;
+        public DriveY (double Y, Vector2d speed) {
+            x = Y;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.y < x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.y < x;
+        }
+    }
+
+    public Action DriveY(double x, Vector2d speed) {
+        return new DriveY(x, speed);
+    }
+
+    public class DriveYLess implements Action {
+        double x;
+        Vector2d speed;
+        public DriveYLess (double Y, Vector2d speed) {
+            x = Y;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            if(pose.position.y > x) {
+                setDrivePowers(new PoseVelocity2d(speed, 0));
+            } else {
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+            }
+
+            return pose.position.y > x;
+        }
+    }
+
+    public Action DriveYLess(double y, Vector2d speed) {
+        return new DriveYLess(y, speed);
+    }
+
+
+    public class Rotate1 implements Action {
+        double angle;
+        double speed;
+        public Rotate1 (double angle, double speed) {
+            this.angle = angle;
+            this.speed = speed;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            updatePoseEstimate();
+
+            double error = angle - Math.toDegrees(pose.heading.toDouble());
+            setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), speed));
+
+            if(Math.abs(error) < 4)
+                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
+
+            return Math.abs(error) > 4;
+        }
+    }
+
+    public Action Rotate1(double angle, double speed) {
+        return new Rotate1(angle, speed);
+    }
 }

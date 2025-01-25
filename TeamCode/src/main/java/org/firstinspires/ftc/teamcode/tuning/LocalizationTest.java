@@ -17,7 +17,7 @@ public class LocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, new Pose2d(36 , 63, Math.toRadians(-180)));
+        PinpointDrive drive = new PinpointDrive(hardwareMap, new Pose2d(-8, -60, Math.toRadians(-90)));
 
         waitForStart();
 

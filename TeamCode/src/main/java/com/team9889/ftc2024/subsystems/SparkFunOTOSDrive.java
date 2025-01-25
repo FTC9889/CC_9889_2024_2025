@@ -6,21 +6,7 @@ import static com.acmerobotics.roadrunner.ftc.OTOSKt.OTOSPoseToRRPose;
 import static com.acmerobotics.roadrunner.ftc.OTOSKt.RRPoseToOTOSPose;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.atan2;
-import static java.lang.Math.hypot;
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.toDegrees;
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -28,21 +14,11 @@ import com.acmerobotics.roadrunner.ftc.DownsampledWriter;
 import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.SparkFunOTOSCorrected;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-import com.team9889.lib.CruiseLib;
-import com.team9889.lib.Pose;
-import com.team9889.lib.control.controllers.PID;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Drawing;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
-
-import java.util.ArrayList;
 
 /**
  * Experimental extension of MecanumDrive that uses the SparkFun OTOS sensor for localization.
@@ -161,10 +137,6 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         pose = OTOSPoseToRRPose(otosPose);
         lastOtosPose = pose;
 
-        xVel = otosVel.x;
-        yVel = otosVel.y;
-        thetaVel = otosVel.h;
-
         // RR standard
         poseHistory.add(pose);
         while (poseHistory.size() > 100) {
@@ -178,134 +150,4 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         return new PoseVelocity2d(new Vector2d(otosVel.x, otosVel.y),otosVel.h);
     }
 
-    public class DriveX implements Action {
-        double x;
-        Vector2d speed;
-        public DriveX (double X, Vector2d speed) {
-            x = X;
-            this.speed = speed;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            updatePoseEstimate();
-
-            if(pose.position.x < x) {
-               setDrivePowers(new PoseVelocity2d(speed, 0));
-            } else {
-                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
-            }
-
-            return pose.position.x < x;
-        }
-    }
-
-    public class DriveXLess implements Action {
-        double x;
-        Vector2d speed;
-        public DriveXLess (double X, Vector2d speed) {
-            x = X;
-            this.speed = speed;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            updatePoseEstimate();
-
-            if(pose.position.x > x) {
-                setDrivePowers(new PoseVelocity2d(speed, 0));
-            } else {
-                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
-            }
-
-            return pose.position.x > x;
-        }
-    }
-
-    public Action DriveXLess(double x, Vector2d vector2d) {
-        return new DriveXLess(x, vector2d);
-    }
-
-    public Action DriveX(double x, Vector2d speed) {
-        return new DriveX(x, speed);
-    }
-
-    public class DriveY implements Action {
-        double x;
-        Vector2d speed;
-        public DriveY (double Y, Vector2d speed) {
-            x = Y;
-            this.speed = speed;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            updatePoseEstimate();
-
-            if(pose.position.y < x) {
-                setDrivePowers(new PoseVelocity2d(speed, 0));
-            } else {
-                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
-            }
-
-            return pose.position.y < x;
-        }
-    }
-
-    public Action DriveY(double x, Vector2d speed) {
-        return new DriveY(x, speed);
-    }
-
-    public class DriveYLess implements Action {
-        double x;
-        Vector2d speed;
-        public DriveYLess (double Y, Vector2d speed) {
-            x = Y;
-            this.speed = speed;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            updatePoseEstimate();
-
-            if(pose.position.y > x) {
-                setDrivePowers(new PoseVelocity2d(speed, 0));
-            } else {
-                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
-            }
-
-            return pose.position.y > x;
-        }
-    }
-
-    public Action DriveYLess(double y, Vector2d speed) {
-        return new DriveYLess(y, speed);
-    }
-
-
-    public class Rotate1 implements Action {
-        double angle;
-        double speed;
-        public Rotate1 (double angle, double speed) {
-            this.angle = angle;
-            this.speed = speed;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            updatePoseEstimate();
-
-            double error = angle - Math.toDegrees(pose.heading.toDouble());
-            setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), speed));
-
-            if(Math.abs(error) < 4)
-                setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0));
-
-            return Math.abs(error) > 4;
-        }
-    }
-
-    public Action Rotate1(double angle, double speed) {
-        return new Rotate1(angle, speed);
-    }
 }

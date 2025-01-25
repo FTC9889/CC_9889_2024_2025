@@ -156,7 +156,7 @@ public class YellowAutoForNow extends LinearOpMode {
                 new InstantAction(() -> {
                     mRobot.mLift.setWristPosition(0.6);
                 }),
-                mRobot.mDrive.DriveX(65   , new Vector2d(0, 0.3)),
+                mRobot.mDrive.DriveX(66   , new Vector2d(0, 0.3)),
                 mRobot.mLift.scoreHigh()
 
         ));
@@ -172,11 +172,16 @@ public class YellowAutoForNow extends LinearOpMode {
                             mRobot.mIntake.setIntakePower(Intake.PowerState.ON.setTargetPower());
                             mRobot.mIntake.setIntakeLockPosition(1);
                         }),
+
+                        mRobot.mDrive.DriveYLess(53, new Vector2d(0.3, 0)),
+
                         new SleepAction(0.25),
                         mRobot.mIntake.AutoSamples(577),
                         new SleepAction(0.5),
                         mRobot.mIntake.AutoSamples(430),
-                        new SleepAction(0.5)
+                        new SleepAction(0.5),
+
+                        mRobot.mDrive.DriveY(54, new Vector2d(-0.3, 0))
                 ))
         );
 
@@ -224,7 +229,7 @@ public class YellowAutoForNow extends LinearOpMode {
                                 ),
                                 new SequentialAction(
                                         new InstantAction(() -> {
-                                            mRobot.mFlag.setFlagPosition(0.55);
+                                            mRobot.mFlag.setFlagPosition(0.53);
                                             mRobot.mIntake.setIntakeLockPosition(1);
                                             mRobot.mDrive.setDrivePowers(new PoseVelocity2d(new Vector2d(1, 0), -0.15));
                                         }),

@@ -28,15 +28,15 @@ public class Inspection_TeleOp extends LinearOpMode {
 
         while (opModeIsActive()){
 
-            if (gamepad1.a){
-                intakeAction = mRobot.mIntake.InspectionExtend();
-                liftAction = mRobot.mLift.ScorePrepare();
-            }
-
-            if (gamepad1.b) {
-                intakeAction = mRobot.mIntake.Retracted();
-                liftAction = mRobot.mLift.TransferPrepare();
-            }
+//            if (gamepad1.a){
+//                intakeAction = mRobot.mIntake.InspectionExtend();
+//                liftAction = mRobot.mLift.ScorePrepare();
+//            }
+//
+//            if (gamepad1.b) {
+//                intakeAction = mRobot.mIntake.Retracted();
+//                liftAction = mRobot.mLift.TransferPrepare();
+//            }
 
             if (intakeAction != null) {
                 intakeAction.preview(packet.fieldOverlay());

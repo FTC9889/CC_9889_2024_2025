@@ -70,6 +70,32 @@ public class Lift {
         RequestedWristState = requestedWRistState;
     }
 
+    public enum TopLevelState {
+        HIGH_BASKET(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION),
+        HIGH_BASKET_RELEASE(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.OPEN_POSITION),
+        HIGH_RUNG(LiftState.HIGH_RUNG_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION),
+        HIGH_RUNG_SCORED(LiftState.HIGH_RUNG_SCORE_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION),
+        HIGH_RUNG_RELEASE(LiftState.HIGH_RUNG_RELEASED_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.OPEN_POSITION),
+        TRANSFER_PREPARE(INTAKE_POSITION, ElbowStates.INTAKE_POSITION, WristState.INTAKE_POSITION, ClawStates.OPEN_POSITION),
+        TRANSFER_READY(LiftState.TRANSFER_POSITION, ElbowStates.TRANSFER_POSITION, WristState.TRANSFER_POSITION, ClawStates.OPEN_POSITION),
+        TRANSFER_COMPLETE(LiftState.TRANSFER_POSITION, ElbowStates.TRANSFER_POSITION, WristState.TRANSFER_POSITION, ClawStates.CLOSED_POSITION);
+
+        final LiftState liftState;
+        final ElbowStates elbowStates;
+        final WristState wristState;
+        final ClawStates clawStates;
+
+        TopLevelState(LiftState liftstate, ElbowStates elbowStates, WristState wristState, ClawStates clawStates) {
+
+            this.liftState = liftstate;
+            this.elbowStates = elbowStates;
+            this.wristState = wristState;
+            this.clawStates = clawStates;
+        }
+
+
+    }
+
     public enum LiftState {
         NULL(0),
         INTAKE_POSITION(0),
@@ -464,6 +490,110 @@ public class Lift {
         }
     }
 
+    /**
+     * update = lift controller
+     */
+    public void update() {
+        setWristPosition(RequestedWristState.getTargetPosition());
+
+        if (RequestedWristState != CurrentWristState) {
+
+            if (resetWristTimer) {
+                wristTimer.reset();
+                resetWristTimer = false;
+            }
+
+            if(wristTimer.seconds() >
+                    0.1 * Math.abs(RequestedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
+                CurrentWristState = RequestedWristState;
+
+        } else {
+            resetWristTimer = true;
+        }
+
+        RobotLog.d("Timer: "+ wristTimer.seconds());
+
+
+        if (RequestedElbowState != CurrentElbowState) {
+            setElbowPosition(RequestedElbowState.getTargetPosition());
+
+            if (!resetElbowTimer) {
+                elbowTimer.reset();
+                resetElbowTimer = true;
+            }
+
+            if(elbowTimer.seconds() >
+                    0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
+                CurrentElbowState = RequestedElbowState;
+
+        } else {
+            resetElbowTimer = false;
+        }
+
+        if (RequestedClawState != CurrentClawState) {
+            setClawPosition(RequestedClawState.getTargetPosition());
+
+            if (!resetClawTimer) {
+                clawTimer.reset();
+                resetClawTimer = true;
+            }
+
+            if(clawTimer.seconds() >
+                    0.1 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
+                CurrentClawState = RequestedClawState;
+        } else {
+            resetClawTimer = false;
+        }
+
+        if(RequestedLiftState != CurrentLiftState) {
+            setLiftPosition(RequestedLiftState.getTargetPosition());
+
+            if(liftInPosition()) {
+                CurrentLiftState = RequestedLiftState;
+            }
+        }
+
+        if (RequestedLiftState == CurrentLiftState)
+            lastGoodState = CurrentLiftState;
+
+        double power;
+        double error = liftTargetPosition - currentLiftPosition();
+        if(liftTargetPosition != 0) {
+
+            power = lift_kp * error;
+            power = Math.min(power, 1);
+
+            setLiftMotorPower(power);
+
+            if(getCurrentDraw() > 10000 && power < -0.8) {
+                setRequestedLiftState(lastGoodState);
+                CurrentLiftState = INTAKE_POSITION;
+            }
+
+            // Reset Timer
+            if (liftTimer == null) {
+                liftTimer = new ElapsedTime();
+            } else {
+                liftTimer.reset();
+            }
+
+            // Set last error
+            lastError = error;
+        } else {
+            if(currentLiftPosition() > 200) {
+                power = -1;
+            } else {
+                power = -0.5;
+            }
+
+            setLiftMotorPower(power);
+        }
+    }
+
+    public boolean isComplete() {
+        return RequestedLiftState == CurrentLiftState && RequestedWristState == CurrentWristState && RequestedElbowState == CurrentElbowState && RequestedClawState == CurrentClawState;
+    }
+
     double lastError = 0;
     ElapsedTime liftTimer = null;
     public class LiftControl implements Action {
@@ -579,6 +709,13 @@ public class Lift {
 
     public Action AutoDrop(){
         return new requestState(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.OPEN_POSITION);
+    }
+
+    public void request(TopLevelState state){
+        RequestedLiftState = state.liftState;
+        RequestedElbowState = state.elbowStates;
+        RequestedWristState = state.wristState;
+        RequestedClawState = state.clawStates;
     }
 
     public class waitForFinish implements Action {

@@ -66,9 +66,6 @@ public class Intake {
         RequstedPowerState = requstedPowerState;
     }
 
-
-
-
     public void setIntakeLockPosition(double position){
         intakeLock.setPosition(position);
     }
@@ -78,8 +75,29 @@ public class Intake {
         intakeWristR.setPosition(position);
     }
 
+    public enum TopLevelState {
+        RETRACTED(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, SampleColor.NULL),
+        AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 560);
 
+        final IntakeState intakeState;
+        final WristState wristState;
+        final PowerState powerState;
+        final SampleColor sampleColor;
+        final int targetPosition;
 
+        TopLevelState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor, int targetPosition) {
+            this.intakeState = intakeState;
+            this.wristState = wristState;
+            this.powerState = powerState;
+            this.sampleColor = sampleColor;
+            this.targetPosition = targetPosition;
+
+        }
+
+        TopLevelState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor) {
+            this(intakeState, wristState, powerState, sampleColor, 0);
+        }
+    }
 
     public enum IntakeState {
         INTAKE,
@@ -425,79 +443,203 @@ public class Intake {
         }
     }
 
-    public class WaitForSample implements Action {
-
-        double seconds = 0;
-
-        public WaitForSample(double seconds) {
-            this.seconds = seconds;
-        }
-        boolean first = true;
-        ElapsedTime timer = new ElapsedTime();
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if(first) {
-                timer.reset();
-                first = false;
-            } else {
-                return getIntakeColor() != Intake.SampleColor.NEUTRAL || timer.seconds() < seconds;
-            }
-
-            return true;
-        }
-    }
-
-    public Action WaitForSample(double seconds) {
-        return new WaitForSample(seconds);
-    }
+//    public class WaitForSample implements Action {
+//
+//        double seconds = 0;
+//
+//        public WaitForSample(double seconds) {
+//            this.seconds = seconds;
+//        }
+//        boolean first = true;
+//        ElapsedTime timer = new ElapsedTime();
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            if(first) {
+//                timer.reset();
+//                first = false;
+//            } else {
+//                return getIntakeColor() != SampleColor.NEUTRAL || timer.seconds() < seconds;
+//            }
+//
+//            return true;
+//        }
+//    }
+//
+//    public Action WaitForSample(double seconds) {
+//        return new WaitForSample(seconds);
+//    }
 
     private boolean allowDriverExtension = false;
     public boolean allowDriverExtension(){
         return allowDriverExtension;
     }
 
-    public Action Deployed() {
-        return new requestState(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
-    }
+//    public Action Deployed() {
+//        return new requestState(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+//    }
+//
+//    public Action Outtake() {
+//        return new requestState(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, CurrentSampleColor);
+//    }
+//
+//    public Action Retracted() {
+//        return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, CurrentSampleColor);
+//    }
+//
+//    public Action AutoSamples(int target) {
+//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, target);
+//    }
+//
+//    public Action AutoSamples() {
+//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 560);
+//    }
+//
+//    public Action AutoSpecimenSamples() {
+//        return new requestState(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
+//    }
+//
+//    public Action InspectionExtend() {
+//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.OFF, CurrentSampleColor, 577);
+//    }
+//
+//    private boolean waitForFinish(IntakeState intakeState, WristState wristState, PowerState powerState) {
+//        return getCurrentIntakeState() == intakeState && getCurrentWristState() == wristState && getCurrentPowerState() == powerState;
+//    }
 
-    public Action Outtake() {
-        return new requestState(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, CurrentSampleColor);
-    }
+//    public class WaitForRetract implements Action {
+//
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+//            return extension.getCurrentPosition() > 20;
+//        }
+//    }
+//
+//    public Action waitForRetract() {
+//        return new WaitForRetract();
+//    }
 
-    public Action Retracted() {
-        return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.SLOW, CurrentSampleColor);
-    }
 
-    public Action AutoSamples(int target) {
-        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, target);
-    }
+    ElapsedTime wristTimer = new ElapsedTime();
+    boolean resetWristTimer = false;
 
-    public Action AutoSamples() {
-        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 560);
-    }
+    ElapsedTime lockTimer = new ElapsedTime();
+    ElapsedTime lockTimer2 = new ElapsedTime();
+    ElapsedTime lockTimer3 = new ElapsedTime();
 
-    public Action AutoSpecimenSamples() {
-        return new requestState(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
-    }
+    int target = 0;
 
-    public Action InspectionExtend() {
-        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.OFF, CurrentSampleColor, 577);
-    }
+    public void update() {
+        // Wrist Control
+        if (RequstedWristState != CurrentWristState) {
+            if(!resetWristTimer) {
+                wristTimer.reset();
+                resetWristTimer = true;
+            }
 
-    private boolean waitForFinish(IntakeState intakeState, WristState wristState, PowerState powerState) {
-        return getCurrentIntakeState() == intakeState && getCurrentWristState() == wristState && getCurrentPowerState() == powerState;
-    }
+            if(RequestedIntakeState == IntakeState.INTAKE) {
+                if (extension.getCurrentPosition() < 100) {
+                    setWristPosition(WristState.MIDDLE_POSITION.getTargetPosition());
+                    CurrentWristState = WristState.MIDDLE_POSITION;
+                } else {
+                    setWristPosition(RequstedWristState.getTargetPosition());
+                    if(wristTimer.milliseconds() > 500) {
+                        CurrentWristState = RequstedWristState;
+                    }
+                }
+            } else if (RequestedIntakeState == IntakeState.AUTO_EXTEND && CurrentIntakeState != IntakeState.AUTO_EXTEND) {
+                if (extension.getCurrentPosition() < 100) {
+                    setWristPosition(WristState.MIDDLE_POSITION.getTargetPosition());
+                    CurrentWristState = WristState.MIDDLE_POSITION;
+                } else {
+                    setWristPosition(RequstedWristState.getTargetPosition()-0.03);
+                    if(wristTimer.milliseconds() > 500) {
+                        CurrentWristState = RequstedWristState;
+                    }
+                }
+            } else {
+                setWristPosition(RequstedWristState.getTargetPosition());
 
-    public class WaitForRetract implements Action {
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            return extension.getCurrentPosition() > 20;
+                if(wristTimer.milliseconds() > 500) {
+                    CurrentWristState = RequstedWristState;
+                }
+            }
+        } else {
+            resetWristTimer = false;
         }
+
+        // Intake Case
+        if (RequestedIntakeState == IntakeState.INTAKE) {
+            setExtensionLockPosition(openPosition);
+
+            if (lockTimer.milliseconds() > 50)
+                CurrentIntakeState = RequestedIntakeState;
+        } else {
+            lockTimer.reset();
+        }
+
+        // Retracted
+        if (RequestedIntakeState == IntakeState.RETRACTED){
+            if(extension.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
+                extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            if (!magnetSensor.getState()) {
+                setExtensionLockPosition(closedPosition);
+                extension.setPower(0);
+                setRequstedPowerState(PowerState.OFF);
+                CurrentIntakeState = RequestedIntakeState;
+            } else {
+                setExtensionLockPosition(openPosition);
+
+                if (extension.getCurrentPosition() < 100){
+                    extension.setPower(-0.5);
+                    setRequstedWristState(WristState.UP_POSITION);
+                    setRequstedPowerState(PowerState.ON);
+                }else {
+                    extension.setPower(-1);
+                    setRequstedWristState(WristState.MIDDLE_POSITION);
+                }
+            }
+        }
+
+        // Auto Extend
+        if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
+            if (lockTimer3.milliseconds() < 50) {
+                setExtensionLockPosition(openPosition);
+            } else {
+                extension.setTargetPosition(target);
+                extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                extension.setPower(0.8);
+            }
+
+            if (Math.abs(extension.getCurrentPosition() - target) < 40) {
+                extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                extension.setTargetPosition(target);
+                extension.setPower(0);
+                CurrentIntakeState = RequestedIntakeState;
+            }
+
+        } else {
+            lockTimer3.reset();
+        }
+
+        // Intake Power State
+        if (RequstedPowerState != CurrentPowerState) {
+            setIntakePower(RequstedPowerState.setTargetPower());
+            CurrentPowerState = RequstedPowerState;
+        }
+
+        allowDriverExtension = CurrentIntakeState == IntakeState.INTAKE && RequestedIntakeState == IntakeState.INTAKE;
     }
 
-    public Action waitForRetract() {
-        return new WaitForRetract();
+    public boolean isComplete() {
+        return RequestedIntakeState == CurrentIntakeState && RequstedWristState == CurrentWristState & RequstedPowerState == CurrentPowerState;
+    }
+
+    public void requestState(TopLevelState state) {
+        RequestedIntakeState = state.intakeState;
+        RequstedWristState = state.wristState;
+        RequstedPowerState = state.powerState;
+        target = state.targetPosition;
     }
 }
 

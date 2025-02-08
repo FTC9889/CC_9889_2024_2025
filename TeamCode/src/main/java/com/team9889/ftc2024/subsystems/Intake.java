@@ -6,16 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -76,8 +73,9 @@ public class Intake {
     }
 
     public enum TopLevelState {
-        RETRACTED(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, SampleColor.NULL),
-        AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 560);
+        RETRACTION(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, SampleColor.NULL),
+        AUTO_RETRACTED(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.ON, SampleColor.NULL),
+        AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0);
 
         final IntakeState intakeState;
         final WristState wristState;
@@ -526,7 +524,7 @@ public class Intake {
     ElapsedTime lockTimer2 = new ElapsedTime();
     ElapsedTime lockTimer3 = new ElapsedTime();
 
-    int target = 0;
+    public int target = 0;
 
     public void update() {
         // Wrist Control
@@ -548,8 +546,8 @@ public class Intake {
                 }
             } else if (RequestedIntakeState == IntakeState.AUTO_EXTEND && CurrentIntakeState != IntakeState.AUTO_EXTEND) {
                 if (extension.getCurrentPosition() < 100) {
-                    setWristPosition(WristState.MIDDLE_POSITION.getTargetPosition());
-                    CurrentWristState = WristState.MIDDLE_POSITION;
+                    setWristPosition(WristState.DOWN_POSITION.getTargetPosition());
+                    CurrentWristState = WristState.DOWN_POSITION;
                 } else {
                     setWristPosition(RequstedWristState.getTargetPosition()-0.03);
                     if(wristTimer.milliseconds() > 500) {
@@ -604,7 +602,11 @@ public class Intake {
         // Auto Extend
         if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
             if (lockTimer3.milliseconds() < 50) {
-                setExtensionLockPosition(openPosition);
+                if (target == 0){
+                    setExtensionLockPosition(closedPosition);
+                } else {
+                    setExtensionLockPosition(openPosition);
+                }
             } else {
                 extension.setTargetPosition(target);
                 extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);

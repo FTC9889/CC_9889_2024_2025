@@ -1,6 +1,7 @@
 package com.team9889.ftc2024.subsystems;
 
 
+import static com.team9889.ftc2024.subsystems.Lift.LiftState.HIGH_BASKET_POSITION;
 import static com.team9889.ftc2024.subsystems.Lift.LiftState.INTAKE_POSITION;
 
 import androidx.annotation.NonNull;
@@ -71,7 +72,8 @@ public class Lift {
     }
 
     public enum TopLevelState {
-        HIGH_BASKET(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION),
+        HIGH_BASKET(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.CLOSED_POSITION),
+        HIGH_BASKET_READY(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION),
         HIGH_BASKET_RELEASE(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.OPEN_POSITION),
         HIGH_RUNG(LiftState.HIGH_RUNG_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION),
         HIGH_RUNG_SCORED(LiftState.HIGH_RUNG_SCORE_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION),
@@ -100,14 +102,14 @@ public class Lift {
         NULL(0),
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
-        LOW_RUNG_POSITION(180),
-        HIGH_RUNG_POSITION(700),
-        HIGH_RUNG_RELEASED_POSITION(500),
-        HIGH_RUNG_SCORE_POSITION(500),
-        LOW_BASKET_POSITION(644),
-        HIGH_BASKET_POSITION(1485 - 7),
+        LOW_RUNG_POSITION((int) (180 * 0.661)),
+        HIGH_RUNG_POSITION((int) (700 * 0.661)),
+        HIGH_RUNG_RELEASED_POSITION((int) (500 * 0.661)),
+        HIGH_RUNG_SCORE_POSITION((int) (500 * 0.661)),
+        LOW_BASKET_POSITION((int) (644 * 0.661)),
+        HIGH_BASKET_POSITION((int) (1478 * 0.661)),
         HUMAN_PLAYER_POSITION(0),
-        LEVEL_ONE_ASSENT_POSITION(497),
+        LEVEL_ONE_ASSENT_POSITION((int) (497 * 0.661)),
         TRANSFER_POSITION(0);
 
         private final int value;
@@ -201,7 +203,7 @@ public class Lift {
         HUMAN_PLAYER_POSITION(0.8),
         HUMAN_PLAYER_POSITION_2(0.6),
         RUNG_SCORE_POSITION(0.8),
-        BASKET_SCORE_POSITION(0.8),
+        BASKET_SCORE_POSITION(0.425),
         BASKET_SCORE_READY_POSITION(0.6),
         DEFAULT_POSITION(0.8),
         TRANSFER_POSITION(0.43);
@@ -354,7 +356,7 @@ public class Lift {
     }
 
     private boolean liftInPosition() {
-        return Math.abs(liftTargetPosition - currentLiftPosition()) <= 20;
+        return Math.abs(liftTargetPosition - currentLiftPosition()) <= 40;
     }
 
     private boolean wristInPosition = false;
@@ -389,23 +391,6 @@ public class Lift {
         claw.setPosition(ClawStates.LOOSE_POSITION.getTargetPosition());
     }
 
-    public class openClaw implements Action {
-        ElapsedTime timer = null;
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if(timer == null)
-                timer = new ElapsedTime();
-
-            openClaw();
-
-            return timer.milliseconds() < 50;
-        }
-    }
-
-    public Action ReleaseClaw() {
-        return new openClaw();
-    }
-
     static ElapsedTime wristTimer = new ElapsedTime();
     static boolean resetWristTimer = true;
 
@@ -414,81 +399,6 @@ public class Lift {
 
     static ElapsedTime clawTimer = new ElapsedTime();
     static boolean resetClawTimer = false;
-
-
-    public class requestState implements Action {
-
-        public requestState(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
-            setRequestedLiftState(liftState);
-            setRequestedElbowState(elbowState);
-            setRequestedWristState(wristState);
-            setRequestedClawState(clawState);
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            setWristPosition(RequestedWristState.getTargetPosition());
-
-            if (RequestedWristState != CurrentWristState) {
-
-                if (resetWristTimer) {
-                    wristTimer.reset();
-                    resetWristTimer = false;
-                }
-
-                if(wristTimer.seconds() >
-                        0.1 * Math.abs(RequestedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
-                    CurrentWristState = RequestedWristState;
-
-            } else {
-                resetWristTimer = true;
-            }
-
-            RobotLog.d("Timer: "+ wristTimer.seconds());
-
-
-            if (RequestedElbowState != CurrentElbowState) {
-                setElbowPosition(RequestedElbowState.getTargetPosition());
-
-                if (!resetElbowTimer) {
-                    elbowTimer.reset();
-                    resetElbowTimer = true;
-                }
-
-                if(elbowTimer.seconds() >
-                        0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
-                    CurrentElbowState = RequestedElbowState;
-
-            } else {
-                resetElbowTimer = false;
-            }
-
-            if (RequestedClawState != CurrentClawState) {
-                setClawPosition(RequestedClawState.getTargetPosition());
-
-                if (!resetClawTimer) {
-                    clawTimer.reset();
-                    resetClawTimer = true;
-                }
-
-                if(clawTimer.seconds() >
-                        0.1 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
-                    CurrentClawState = RequestedClawState;
-            } else {
-                resetClawTimer = false;
-            }
-
-            if(RequestedLiftState != CurrentLiftState) {
-                setLiftPosition(RequestedLiftState.getTargetPosition());
-
-                if(liftInPosition()) {
-                    CurrentLiftState = RequestedLiftState;
-                }
-            }
-
-            return RequestedLiftState != CurrentLiftState || RequestedWristState != CurrentWristState || RequestedElbowState != CurrentElbowState || RequestedClawState != CurrentClawState;
-        }
-    }
 
     /**
      * update = lift controller
@@ -513,19 +423,21 @@ public class Lift {
 
         RobotLog.d("Timer: "+ wristTimer.seconds());
 
-
         if (RequestedElbowState != CurrentElbowState) {
-            setElbowPosition(RequestedElbowState.getTargetPosition());
+            if(RequestedLiftState == HIGH_BASKET_POSITION && !liftInPosition()) {
+                setElbowPosition(0.5);
+            } else {
+                setElbowPosition(RequestedElbowState.getTargetPosition());
 
-            if (!resetElbowTimer) {
-                elbowTimer.reset();
-                resetElbowTimer = true;
+                if (!resetElbowTimer) {
+                    elbowTimer.reset();
+                    resetElbowTimer = true;
+                }
+
+                if(elbowTimer.seconds() >
+                        0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
+                    CurrentElbowState = RequestedElbowState;
             }
-
-            if(elbowTimer.seconds() >
-                    0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
-                CurrentElbowState = RequestedElbowState;
-
         } else {
             resetElbowTimer = false;
         }
@@ -539,7 +451,7 @@ public class Lift {
             }
 
             if(clawTimer.seconds() >
-                    0.1 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
+                    0.5 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
                 CurrentClawState = RequestedClawState;
         } else {
             resetClawTimer = false;
@@ -596,221 +508,11 @@ public class Lift {
 
     double lastError = 0;
     ElapsedTime liftTimer = null;
-    public class LiftControl implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if (RequestedLiftState == CurrentLiftState)
-                lastGoodState = CurrentLiftState;
-
-            double power;
-            double error = liftTargetPosition - currentLiftPosition();
-            if(liftTargetPosition != 0) {
-
-                power = lift_kp * error;
-                power = Math.min(power, 1);
-
-                setLiftMotorPower(power);
-
-                if(getCurrentDraw() > 10000 && power < -0.8) {
-                    setRequestedLiftState(lastGoodState);
-                    CurrentLiftState = INTAKE_POSITION;
-                }
-
-                // Reset Timer
-                if (liftTimer == null) {
-                    liftTimer = new ElapsedTime();
-                } else {
-                    liftTimer.reset();
-                }
-
-                // Set last error
-                lastError = error;
-            } else {
-                if(currentLiftPosition() > 200) {
-                    power = -1;
-                } else {
-                    power = -0.5;
-                }
-
-                setLiftMotorPower(power);
-            }
-
-            return true;
-        }
-    }
-
-    public boolean inStates(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
-        return getCurrentLiftState() == liftState && getCurrentElbowState() == elbowState && getCurrentWristState() == wristState && getCurrentClawState() == clawState;
-    }
-
-    public Action LiftController(){
-        return new LiftControl();
-    }
-
-    public Action HighRung() {
-        return new requestState(LiftState.HIGH_RUNG_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HighRungScored(){
-        return new requestState(LiftState.HIGH_RUNG_SCORE_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HighRungScoredReleased(){
-        return new requestState(LiftState.HIGH_RUNG_RELEASED_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.OPEN_POSITION);
-    }
-
-    public Action LowRung(){
-        return new requestState(LiftState.LOW_RUNG_POSITION, ElbowStates.RUNG_SCORE_POSITION, WristState.RUNG_SCORE_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HighBasket() {
-        return new requestState(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HighBasketReady() {
-        return new requestState(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HighBasketReadyScored() {
-        return new requestState(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.OPEN_POSITION);
-    }
-
-    public Action LowBasket(){
-        return new requestState(LiftState.LOW_BASKET_POSITION, ElbowStates.BASKET_SCORE_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HumanPlayer(){
-        return new requestState(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.HUMAN_PLAYER_POSITION, WristState.HUMAN_PLAYER_POSITION, ClawStates.OPEN_POSITION);
-    }
-
-    public Action HumanPlayerIntaked(){
-        return new requestState(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.HUMAN_PLAYER_POSITION, WristState.HUMAN_PLAYER_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action HumanPlayerIntakedReady(){
-        return new requestState(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.HUMAN_PLAYER_POSITION_2, WristState.HUMAN_PLAYER_POSITION_2, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action TransferPrepare(){
-        return new requestState(INTAKE_POSITION, ElbowStates.INTAKE_POSITION, WristState.INTAKE_POSITION, ClawStates.OPEN_POSITION);
-    }
-
-    public Action TransferReady(){
-        return new requestState(LiftState.TRANSFER_POSITION, ElbowStates.TRANSFER_POSITION, WristState.TRANSFER_POSITION, ClawStates.OPEN_POSITION);
-    }
-
-    public Action TransferComplete(){
-        return new requestState(LiftState.TRANSFER_POSITION, ElbowStates.TRANSFER_POSITION, WristState.TRANSFER_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action ScorePrepare(){
-        return new requestState(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.DEFAULT_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-    public Action AutoDrop(){
-        return new requestState(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.BASKET_SCORE_POSITION, ClawStates.OPEN_POSITION);
-    }
 
     public void request(TopLevelState state){
         RequestedLiftState = state.liftState;
         RequestedElbowState = state.elbowStates;
         RequestedWristState = state.wristState;
         RequestedClawState = state.clawStates;
-    }
-
-    public class waitForFinish implements Action {
-        LiftState liftState; ElbowStates elbowState; WristState wristState; ClawStates clawState;
-        public waitForFinish(LiftState liftState, ElbowStates elbowState, WristState wristState, ClawStates clawState) {
-            this.liftState = liftState;
-            this.elbowState = elbowState;
-            this.wristState = wristState;
-            this.clawState = clawState;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            return !inStates(liftState, elbowState, wristState, clawState);
-        }
-    }
-
-    public Action waitForLiftUp() {
-        return new waitForFinish(LiftState.HIGH_BASKET_POSITION, ElbowStates.BASKET_SCORE_READY_POSITION, WristState.BASKET_SCORE_READY_POSITION, ClawStates.CLOSED_POSITION);
-    }
-
-
-    ElapsedTime timer = new ElapsedTime();
-    boolean time = false;
-    public class ScoreHigh implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            double error = LiftState.HIGH_BASKET_POSITION.getTargetPosition() - currentLiftPosition();
-
-            double power = lift_kp * error;
-            power = Math.min(power, 1);
-
-            setLiftMotorPower(power);
-
-
-
-            if(Math.abs(error) < 50) {
-                if(!time)
-                    timer.reset();
-
-                setClawPosition(ClawStates.OPEN_POSITION.getTargetPosition());
-                setElbowPosition(ElbowStates.BASKET_SCORE_READY_POSITION.getTargetPosition());
-                setWristPosition(WristState.BASKET_SCORE_READY_POSITION.getTargetPosition());
-                 time = true;
-            } else if (Math.abs(error) < 100) {
-                setClawPosition(ClawStates.CLOSED_POSITION.getTargetPosition());
-                setElbowPosition(ElbowStates.BASKET_SCORE_READY_POSITION.getTargetPosition());
-                setWristPosition(WristState.BASKET_SCORE_READY_POSITION.getTargetPosition());
-            } else {
-                setClawPosition(ClawStates.CLOSED_POSITION.getTargetPosition());
-                setElbowPosition(ElbowStates.DEFAULT_POSITION.getTargetPosition());
-                setWristPosition(WristState.DEFAULT_POSITION.getTargetPosition());
-                time = false;
-            }
-
-            if(time && timer.milliseconds() > 750)
-                return false;
-            else
-                return true;
-        }
-    }
-
-
-
-
-    public Action scoreHigh() {
-        return new ScoreHigh();
-    }
-
-
-    public class LiftDown implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            double power;
-
-            if(currentLiftPosition() > 200) {
-                power = -1;
-            } else {
-                power = -0.4;
-            }
-
-            setLiftMotorPower(power);
-
-            setElbowPosition(ElbowStates.DEFAULT_POSITION.getTargetPosition());
-            setWristPosition(WristState.DEFAULT_POSITION.getTargetPosition());
-
-            if(!liftMagnetSensor.getState()) {
-                setLiftMotorPower(0);
-                return false;
-            } else
-                return true;
-        }
-    }
-
-    public Action liftRetract() {
-        return new LiftDown();
     }
 }

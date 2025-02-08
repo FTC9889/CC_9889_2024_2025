@@ -196,6 +196,7 @@ public class BasketAuto extends OpMode {
                 if (mRobot.mLift.isComplete()) {
                     if (timer.milliseconds() > 500) {
                         setPathState(3);
+                        timer.reset();
                     }
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
                 }
@@ -209,7 +210,13 @@ public class BasketAuto extends OpMode {
                         up = false;
                     }
 
-                    setPathState(1);
+                    if (timer.milliseconds() > 500){
+                        setPathState(1);
+                    }
+
+                    if (sampleNumber == 4){
+                        requestOpModeStop();
+                    }
                 }
                 break;
         }

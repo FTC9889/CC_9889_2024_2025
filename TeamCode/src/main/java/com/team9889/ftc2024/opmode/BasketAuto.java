@@ -202,8 +202,6 @@ public class BasketAuto extends OpMode {
                 }
                 break;
             case 3:
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
-
                 if(mRobot.mLift.isComplete() && !mRobot.mDrive.isBusy()) {
                     if(up) {
                         sampleNumber += 1;
@@ -214,9 +212,16 @@ public class BasketAuto extends OpMode {
                         setPathState(1);
                     }
 
-                    if (sampleNumber == 4){
+                    if (sampleNumber == 3){
                         requestOpModeStop();
                     }
+                }
+
+                if (mRobot.mIntake.sampleInIntake() && timer.milliseconds() > 700){
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                    setPathState(500);
+                } else {
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
                 }
                 break;
         }
@@ -237,9 +242,9 @@ public class BasketAuto extends OpMode {
         autonomousPathUpdate();
 
         telemetry.addData("path state", pathState);
-//        telemetry.addData("x", mRobot.mDrive.getPose().getX());
-//        telemetry.addData("y", mRobot.mDrive.getPose().getY());
-//        telemetry.addData("heading", mRobot.mDrive.getPose().getHeading());
+        telemetry.addData("x", mRobot.mDrive.getPose().getX());
+        telemetry.addData("y", mRobot.mDrive.getPose().getY());
+        telemetry.addData("heading", mRobot.mDrive.getPose().getHeading());
 
 
         telemetry.addData("Current Intake State", mRobot.mIntake.getCurrentIntakeState());

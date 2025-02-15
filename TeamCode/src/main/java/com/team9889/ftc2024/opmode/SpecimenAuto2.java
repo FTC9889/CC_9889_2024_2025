@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-@Autonomous(name = "BasketAuto", group = "Examples")
-public class BasketAuto extends OpMode {
+@Autonomous(name = "SpecimenAuto2", group = "Examples")
+public class SpecimenAuto2 extends OpMode {
     Robot mRobot = new Robot();
 
 //    private Follower follower;
@@ -34,9 +34,7 @@ public class BasketAuto extends OpMode {
 
     ElapsedTime timer = new ElapsedTime();
 
-    private final Pose startPose = new Pose(7.84, 103.45, Math.toRadians(-90));
-
-    private final Pose scorePoint = new Pose(13.01, 129.65, Math.toRadians(-45));
+    private final Pose startPose = new Pose(7.000, 63.740, Math.toRadians(-180));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private PathChain scorePreload;
@@ -48,16 +46,14 @@ public class BasketAuto extends OpMode {
 
         scorePreload = mRobot.mDrive.pathBuilder()
                 .addPath(
-                        new BezierCurve(
-                                new Point(startPose.getX(), startPose.getY(), Point.CARTESIAN),
-                                new Point(30.202, 106.290, Point.CARTESIAN),
-                                new Point(22.526, 119.138, Point.CARTESIAN),
-                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
+                        new BezierLine(
+                                new Point(7.000, 63.740, Point.CARTESIAN),
+                                new Point(39.212, 63.740, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(startPose.getHeading(), scorePoint.getHeading())
+                .setTangentHeadingInterpolation()
                 .setReversed(true)
-            .build();
+                .build();
 
 
         secondSample = mRobot.mDrive.pathBuilder()
@@ -69,61 +65,6 @@ public class BasketAuto extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(0))
-                .build();
-
-        scoreSecondSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 3
-                        new BezierLine(
-                                secondSample.getPath(0).getLastControlPoint(),
-                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-12), scorePoint.getHeading())
-                .build();
-
-        thirdSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 4
-                        new BezierLine(
-                                scoreSecondSample.getPath(0).getLastControlPoint(),
-                                new Point(36.71, 131.65, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(0))
-                .build();
-
-        scoreThirdSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 5
-                        new BezierLine(
-                                thirdSample.getPath(0).getLastControlPoint(),
-                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(0), scorePoint.getHeading())
-                .build();
-
-        fourthSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 6
-                        new BezierLine(
-                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN),
-                                new Point(45.22, 133.82, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(90))
-                .build();
-
-        scoreFourthSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 5
-                        new BezierLine(
-                                fourthSample.getPath(0).getLastControlPoint(),
-                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(0), scorePoint.getHeading())
                 .build();
 
     }
@@ -145,84 +86,85 @@ public class BasketAuto extends OpMode {
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                 mRobot.mDrive.followPath(scorePreload);
                 setPathState(1);
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+                mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
                 break;
             case 1:
                 if(!mRobot.mDrive.isBusy()) {
-                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_SCORED);
                     if (mRobot.mLift.isComplete()){
-                        mRobot.mIntake.requestState(sampleList.get(sampleNumber));
-                        mRobot.mDrive.followPath(pickupList.get(sampleNumber),true);
+                        mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
+//                        mRobot.mIntake.requestState(sampleList.get(sampleNumber));
+//                        mRobot.mDrive.followPath(pickupList.get(sampleNumber),true);
                         setPathState(2);
                     }
                 }
 
-                up = true;
-                break;
-            case 2:
-
-                if(mRobot.mDrive.getPose().getX() > 19) {
-                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-                    setPathState(3);
-                    timer.reset();
-                }
-                break;
-            case 3:
-
-                if (mRobot.mIntake.sampleInIntake()){
-                    setPathState(4);
-                } else if (timer.milliseconds() > 1000){
-                    setPathState(4);
-                }
-
-                break;
-            case 4:
-                if(!mRobot.mDrive.isBusy()) {
-                        mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_RETRACTED);
-                        mRobot.mDrive.followPath(scoreList.get(sampleNumber),true);
-
-                        setPathState(5);
-
-                }
-                break;
-            case 5:
-                if (mRobot.mIntake.isComplete()){
-                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_READY);
-                    setPathState(6);
-                    timer.reset();
-                }
-                break;
-            case 6:
-                if (mRobot.mLift.isComplete()) {
-                    if (timer.milliseconds() > 500) {
-                        setPathState(7);
-                        timer.reset();
-                    }
-                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
-                }
-                break;
-            case 7:
-                if(mRobot.mLift.isComplete() && !mRobot.mDrive.isBusy()) {
-                    if(up) {
-                        sampleNumber += 1;
-                        up = false;
-                    }
-
-                    if (timer.milliseconds() > 500){
-                        setPathState(1);
-                    }
-
-                    if (sampleNumber == 3){
-                        requestOpModeStop();
-                    }
-                }
-
-//                if (mRobot.mIntake.sampleInIntake() && timer.milliseconds() > 700){
+//                up = true;
+//                break;
+//            case 2:
+//
+//                if(mRobot.mDrive.getPose().getX() > 19) {
 //                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-//                    setPathState(500);
-//                } else {
-//                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+//                    setPathState(3);
+//                    timer.reset();
 //                }
+//                break;
+//            case 3:
+//
+//                if (mRobot.mIntake.sampleInIntake()){
+//                    setPathState(4);
+//                } else if (timer.milliseconds() > 1000){
+//                    setPathState(4);
+//                }
+//
+//                break;
+//            case 4:
+//                if(!mRobot.mDrive.isBusy()) {
+//                        mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_RETRACTED);
+//                        mRobot.mDrive.followPath(scoreList.get(sampleNumber),true);
+//
+//                        setPathState(5);
+//
+//                }
+//                break;
+//            case 5:
+//                if (mRobot.mIntake.isComplete()){
+//                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_READY);
+//                    setPathState(6);
+//                    timer.reset();
+//                }
+//                break;
+//            case 6:
+//                if (mRobot.mLift.isComplete()) {
+//                    if (timer.milliseconds() > 500) {
+//                        setPathState(7);
+//                        timer.reset();
+//                    }
+//                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
+//                }
+//                break;
+//            case 7:
+//                if(mRobot.mLift.isComplete() && !mRobot.mDrive.isBusy()) {
+//                    if(up) {
+//                        sampleNumber += 1;
+//                        up = false;
+//                    }
+//
+//                    if (timer.milliseconds() > 500){
+//                        setPathState(1);
+//                    }
+//
+//                    if (sampleNumber == 3){
+//                        requestOpModeStop();
+//                    }
+//                }
+//
+////                if (mRobot.mIntake.sampleInIntake() && timer.milliseconds() > 700){
+////                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+////                    setPathState(500);
+////                } else {
+////                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+////                }
                 break;
         }
     }
@@ -320,6 +262,7 @@ public class BasketAuto extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        mRobot.mDrive.setStartingPose(startPose);
         setPathState(0);
     }
 

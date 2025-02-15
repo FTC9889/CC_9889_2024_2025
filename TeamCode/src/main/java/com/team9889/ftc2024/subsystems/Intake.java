@@ -75,7 +75,12 @@ public class Intake {
     public enum TopLevelState {
         RETRACTION(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, SampleColor.NULL),
         AUTO_RETRACTED(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.ON, SampleColor.NULL),
-        AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0);
+        OUTTAKE(IntakeState.RETRACTED, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
+        AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0),
+        DEPLOY(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL),
+        AUTO_SPECIMEN_1(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 255),
+        AUTO_SPECIMEN_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580),
+        AUTO_SPECIMEN_3(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580);
 
         final IntakeState intakeState;
         final WristState wristState;
@@ -124,7 +129,7 @@ public class Intake {
     public enum WristState {
         DOWN_POSITION(0.77),
         MIDDLE_POSITION(0.5),
-        UP_POSITION(0.17),
+        UP_POSITION(0.2),
         NULL(0);
 
         private final double value;
@@ -283,131 +288,7 @@ public class Intake {
         wristPosition = position;
     }
 
-    private class requestState implements Action {
-        ElapsedTime wristTimer = new ElapsedTime();
-        boolean resetWristTimer = false;
 
-        ElapsedTime lockTimer = new ElapsedTime();
-        ElapsedTime lockTimer2 = new ElapsedTime();
-        ElapsedTime lockTimer3 = new ElapsedTime();
-
-        int target = 0;
-
-        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor) {
-            this(intakeState, wristState, powerState, sampleColor, 0);
-        }
-
-        public requestState(IntakeState intakeState, WristState wristState, PowerState powerState, SampleColor sampleColor, int targetPosition) {
-            setRequestedIntakeState(intakeState);
-
-            if (intakeState != IntakeState.RETRACTED) {
-                setRequstedWristState(wristState);
-                setRequstedPowerState(powerState);
-            }
-
-            CurrentSampleColor = sampleColor;
-            target = targetPosition;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-
-            // Wrist Control
-            if (RequstedWristState != CurrentWristState) {
-                if(!resetWristTimer) {
-                    wristTimer.reset();
-                    resetWristTimer = true;
-                }
-
-                if(RequestedIntakeState == IntakeState.INTAKE) {
-                    if (extension.getCurrentPosition() < 100) {
-                        setWristPosition(WristState.MIDDLE_POSITION.getTargetPosition());
-                        CurrentWristState = WristState.MIDDLE_POSITION;
-                    } else {
-                        setWristPosition(RequstedWristState.getTargetPosition());
-                        if(wristTimer.milliseconds() > 500) {
-                            CurrentWristState = RequstedWristState;
-                        }
-                    }
-                } else if (RequestedIntakeState == IntakeState.AUTO_EXTEND && CurrentIntakeState != IntakeState.AUTO_EXTEND) {
-                    setWristPosition(RequstedWristState.getTargetPosition()-0.03);
-                } else {
-                    setWristPosition(RequstedWristState.getTargetPosition());
-
-                    if(wristTimer.milliseconds() > 500) {
-                        CurrentWristState = RequstedWristState;
-                    }
-                }
-            } else {
-                resetWristTimer = false;
-            }
-
-             // Intake Case
-             if (RequestedIntakeState == IntakeState.INTAKE) {
-                  setExtensionLockPosition(openPosition);
-
-                  if (lockTimer.milliseconds() > 50)
-                    CurrentIntakeState = RequestedIntakeState;
-             } else {
-                 lockTimer.reset();
-             }
-
-            // Retracted
-            if (RequestedIntakeState == IntakeState.RETRACTED){
-                if(extension.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
-                    extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-                if (!magnetSensor.getState()) {
-                    setExtensionLockPosition(closedPosition);
-                    extension.setPower(0);
-                    setRequstedPowerState(PowerState.ON);
-                    CurrentIntakeState = RequestedIntakeState;
-                } else {
-                    setExtensionLockPosition(openPosition);
-
-                    if (extension.getCurrentPosition() < 100){
-                        extension.setPower(-0.5);
-                        setRequstedWristState(WristState.UP_POSITION);
-                        setRequstedPowerState(PowerState.ON);
-                    }else {
-                        extension.setPower(-1);
-                        setRequstedWristState(WristState.MIDDLE_POSITION);
-                    }
-                }
-            }
-
-            // Auto Extend
-            if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
-                if (lockTimer3.milliseconds() < 50) {
-                    setExtensionLockPosition(openPosition);
-                } else {
-                    extension.setTargetPosition(target);
-                    extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    extension.setPower(0.8);
-                }
-
-                if (Math.abs(extension.getCurrentPosition() - target) < 40) {
-                    extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    extension.setTargetPosition(target);
-                    extension.setPower(0);
-                    CurrentIntakeState = RequestedIntakeState;
-                }
-
-            } else {
-                lockTimer3.reset();
-            }
-
-             // Intake Power State
-            if (RequstedPowerState != CurrentPowerState) {
-                setIntakePower(RequstedPowerState.setTargetPower());
-                CurrentPowerState = RequstedPowerState;
-            }
-
-            allowDriverExtension = CurrentIntakeState == IntakeState.INTAKE && RequestedIntakeState == IntakeState.INTAKE;
-
-            return RequestedIntakeState != CurrentIntakeState || RequstedWristState != CurrentWristState || RequstedPowerState != CurrentPowerState;
-        }
-    }
 
     public boolean sampleInIntake(){
         return colorSensor.getDistance(DistanceUnit.INCH) < 1.5;
@@ -441,80 +322,11 @@ public class Intake {
         }
     }
 
-//    public class WaitForSample implements Action {
-//
-//        double seconds = 0;
-//
-//        public WaitForSample(double seconds) {
-//            this.seconds = seconds;
-//        }
-//        boolean first = true;
-//        ElapsedTime timer = new ElapsedTime();
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-//            if(first) {
-//                timer.reset();
-//                first = false;
-//            } else {
-//                return getIntakeColor() != SampleColor.NEUTRAL || timer.seconds() < seconds;
-//            }
-//
-//            return true;
-//        }
-//    }
-//
-//    public Action WaitForSample(double seconds) {
-//        return new WaitForSample(seconds);
-//    }
 
     private boolean allowDriverExtension = false;
     public boolean allowDriverExtension(){
         return allowDriverExtension;
     }
-
-//    public Action Deployed() {
-//        return new requestState(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
-//    }
-//
-//    public Action Outtake() {
-//        return new requestState(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, CurrentSampleColor);
-//    }
-//
-//    public Action Retracted() {
-//        return new requestState(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, CurrentSampleColor);
-//    }
-//
-//    public Action AutoSamples(int target) {
-//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, target);
-//    }
-//
-//    public Action AutoSamples() {
-//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor, 560);
-//    }
-//
-//    public Action AutoSpecimenSamples() {
-//        return new requestState(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, CurrentSampleColor);
-//    }
-//
-//    public Action InspectionExtend() {
-//        return new requestState(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.OFF, CurrentSampleColor, 577);
-//    }
-//
-//    private boolean waitForFinish(IntakeState intakeState, WristState wristState, PowerState powerState) {
-//        return getCurrentIntakeState() == intakeState && getCurrentWristState() == wristState && getCurrentPowerState() == powerState;
-//    }
-
-//    public class WaitForRetract implements Action {
-//
-//        @Override
-//        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-//            return extension.getCurrentPosition() > 20;
-//        }
-//    }
-//
-//    public Action waitForRetract() {
-//        return new WaitForRetract();
-//    }
 
 
     ElapsedTime wristTimer = new ElapsedTime();
@@ -566,7 +378,7 @@ public class Intake {
         }
 
         // Intake Case
-        if (RequestedIntakeState == IntakeState.INTAKE) {
+        if (RequestedIntakeState == IntakeState.INTAKE || RequestedIntakeState == IntakeState.AUTO_EXTEND || RequestedIntakeState == IntakeState.AUTO_SPECIMEN_EXTEND) {
             setExtensionLockPosition(openPosition);
 
             if (lockTimer.milliseconds() > 50)
@@ -585,8 +397,9 @@ public class Intake {
                 extension.setPower(0);
                 setRequstedPowerState(PowerState.OFF);
                 CurrentIntakeState = RequestedIntakeState;
-            } else {
-                setExtensionLockPosition(openPosition);
+            } else if (CurrentIntakeState != IntakeState.RETRACTED){
+                    setExtensionLockPosition(openPosition);
+
 
                 if (extension.getCurrentPosition() < 100){
                     extension.setPower(-0.5);
@@ -600,7 +413,7 @@ public class Intake {
         }
 
         // Auto Extend
-        if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
+        if (RequestedIntakeState == IntakeState.AUTO_EXTEND || RequestedIntakeState == IntakeState.AUTO_SPECIMEN_EXTEND) {
             if (lockTimer3.milliseconds() < 50) {
                 if (target == 0){
                     setExtensionLockPosition(closedPosition);

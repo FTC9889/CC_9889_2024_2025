@@ -17,7 +17,6 @@ public class Robot {
     public Lift mLift = new Lift();
     public Flag mFlag = new Flag();
 
-
     public void init(HardwareMap hardwareMap) {
         Constants.setConstants(FConstants.class, LConstants.class);
         mDrive = new Follower(hardwareMap);

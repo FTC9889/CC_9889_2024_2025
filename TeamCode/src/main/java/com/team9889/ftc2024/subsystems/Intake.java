@@ -75,12 +75,22 @@ public class Intake {
     public enum TopLevelState {
         RETRACTION(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OFF, SampleColor.NULL),
         AUTO_RETRACTED(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.ON, SampleColor.NULL),
+        AUTO_RETRACTED_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.ON, SampleColor.NULL, 200),
+
         OUTTAKE(IntakeState.RETRACTED, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
+        AUTO_OUTTAKE(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL, 580),
+
         AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0),
         DEPLOY(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL),
-        AUTO_SPECIMEN_1(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 255),
-        AUTO_SPECIMEN_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580),
-        AUTO_SPECIMEN_3(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580);
+
+        AUTO_SPECIMEN_1(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 240),
+        AUTO_SPECIMEN_1_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 190),
+
+        AUTO_SPECIMEN_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 550),
+        AUTO_SPECIMEN_2_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 500),
+
+        AUTO_SPECIMEN_3(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580),
+        AUTO_SPECIMEN_3_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 530);
 
         final IntakeState intakeState;
         final WristState wristState;

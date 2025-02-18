@@ -145,19 +145,25 @@ public class BasketAuto extends OpMode {
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                 mRobot.mDrive.followPath(scorePreload);
                 setPathState(1);
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET);
                 break;
             case 1:
                 if(!mRobot.mDrive.isBusy()) {
-                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
-                    if (mRobot.mLift.isComplete()){
-                        mRobot.mIntake.requestState(sampleList.get(sampleNumber));
-                        mRobot.mDrive.followPath(pickupList.get(sampleNumber),true);
-                        setPathState(2);
-                    }
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+                    setPathState(11);
                 }
 
                 up = true;
+                break;
+            case 11:
+                if (mRobot.mLift.isComplete()){
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
+                }
+                if (mRobot.mLift.isComplete()){
+                    mRobot.mIntake.requestState(sampleList.get(sampleNumber));
+                    mRobot.mDrive.followPath(pickupList.get(sampleNumber),true);
+                    setPathState(2);
+                }
                 break;
             case 2:
 
@@ -209,11 +215,8 @@ public class BasketAuto extends OpMode {
                     }
 
                     if (timer.milliseconds() > 500){
+                        mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET);
                         setPathState(1);
-                    }
-
-                    if (sampleNumber == 3){
-                        requestOpModeStop();
                     }
                 }
 

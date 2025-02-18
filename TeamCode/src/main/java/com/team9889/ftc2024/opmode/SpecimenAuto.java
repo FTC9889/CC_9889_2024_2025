@@ -139,7 +139,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 9
                         new BezierLine(
-                                new Point(10.846, 29.034, Point.CARTESIAN),
+                                new Point(15, 29.034, Point.CARTESIAN),
                                 new Point(9.8, 29.034, Point.CARTESIAN)
                         )
                 )
@@ -151,7 +151,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(8.700, 29.034, Point.CARTESIAN),
+                                new Point(9.8, 29.034, Point.CARTESIAN),
                                 new Point(38.5, 66.000, Point.CARTESIAN)
                         )
                 )
@@ -173,7 +173,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 12
                         new BezierLine(
-                                new Point(10.846, 35.900, Point.CARTESIAN),
+                                new Point(15, 35.900, Point.CARTESIAN),
                                 new Point(9.5, 35.900, Point.CARTESIAN)
                         )
                 )
@@ -185,7 +185,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(8.700, 29.034, Point.CARTESIAN),
+                                new Point(9.5, 29.034, Point.CARTESIAN),
                                 new Point(38.5, 66.000, Point.CARTESIAN)
                         )
                 )
@@ -196,7 +196,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 13
                         new BezierLine(
-                                new Point(8.700, 35.900, Point.CARTESIAN),
+                                new Point(9.5, 35.900, Point.CARTESIAN),
                                 new Point(38.5, 68.000, Point.CARTESIAN)
                         )
                 )
@@ -207,7 +207,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 16
                         new BezierLine(
-                                new Point(8.700, 35.900, Point.CARTESIAN),
+                                new Point(9.5, 35.900, Point.CARTESIAN),
                                 new Point(38.5, 70.100, Point.CARTESIAN)
                         )
                 )
@@ -218,7 +218,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 19
                         new BezierLine(
-                                new Point(8.700, 35.900, Point.CARTESIAN),
+                                new Point(9.5, 35.900, Point.CARTESIAN),
                                 new Point(38.5, 72.300, Point.CARTESIAN)
                         )
                 )
@@ -282,6 +282,7 @@ public class SpecimenAuto extends OpMode {
                 break;
             case 21:
                 if(!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()) {
+                    mRobot.mDrive.setMaxPower(0.5);
                     mRobot.mDrive.followPath(intakeList.get(number));
                     number += 1;
                     setPathState(3);

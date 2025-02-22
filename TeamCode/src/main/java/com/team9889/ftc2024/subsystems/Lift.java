@@ -426,7 +426,7 @@ public class Lift {
             resetWristTimer = true;
         }
 
-        RobotLog.d("Timer: "+ wristTimer.seconds());
+//        RobotLog.d("Timer: "+ wristTimer.seconds());
 
         if (RequestedElbowState != CurrentElbowState) {
             if(RequestedLiftState == HIGH_BASKET_POSITION && !liftInPosition()) {

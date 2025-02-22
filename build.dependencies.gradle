@@ -1,5 +1,6 @@
 repositories {
     mavenCentral()
+    mavenLocal()
     google()
 
     maven { url = 'https://maven.brott.dev/' }
@@ -16,7 +17,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:Hardware:10.2.0'
     implementation 'org.firstinspires.ftc:FtcCommon:10.2.0'
     implementation 'org.firstinspires.ftc:Vision:10.2.0'
-    implementation 'com.pedropathing:pedro:1.0.8'
+    implementation 'com.pedropathing:local:1.0.8-local'
     implementation "com.acmerobotics.roadrunner:actions:1.0.1"
     implementation "com.acmerobotics.roadrunner:ftc:0.1.15"
 

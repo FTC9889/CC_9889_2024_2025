@@ -16,6 +16,8 @@ public class TeleOpTest extends LinearOpMode {
     public static double intakePower  = 1;
     public static double intakeExtensionPower = 1;
 
+    public static double clutchPositon = 0.5;
+
 
     public static double clawPosition = 0.5;
     public static double liftPower = 1;
@@ -72,6 +74,10 @@ public class TeleOpTest extends LinearOpMode {
 
             if (gamepad1.dpad_right) {
                 mRobot.mLift.setWristPosition(liftWristPosition);
+            }
+
+            if (gamepad2.left_stick_button){
+                mRobot.mLift.setClutchPosition(clutchPositon);
             }
 
 

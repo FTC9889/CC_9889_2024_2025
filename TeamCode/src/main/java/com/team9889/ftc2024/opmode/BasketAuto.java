@@ -109,7 +109,7 @@ public class BasketAuto extends OpMode {
                         // Line 6
                         new BezierLine(
                                 new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN),
-                                new Point(45.22, 133.82, Point.CARTESIAN)
+                                new Point(45.22, 132, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(90))

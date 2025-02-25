@@ -88,7 +88,7 @@ public class SpecimenAuto extends OpMode {
                         new BezierCurve(
                                 new Point(14.684, 23.527, Point.CARTESIAN),
                                 new Point(72.250, 26.030, Point.CARTESIAN),
-                                new Point(55.564, 17.020, Point.CARTESIAN)
+                                new Point(55.564, 12.00, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -96,11 +96,11 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 5
                         new BezierLine(
-                                new Point(55.564, 17.020, Point.CARTESIAN),
-                                new Point(8.0, 17.020, Point.CARTESIAN)
+                                new Point(55.564, 15.020, Point.CARTESIAN),
+                                new Point(8.0, 19.020, Point.CARTESIAN)
                         )
                 )
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setReversed(true)
                 .build();
 
@@ -119,7 +119,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 12
                         new BezierLine(
-                                new Point(38.5, 68.000, Point.CARTESIAN),
+                                new Point(38, 68.000, Point.CARTESIAN),
                                 new Point(14, 35.900, Point.CARTESIAN)
                         )
                 )
@@ -142,7 +142,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 10
                         new BezierLine(
                                 new Point(9.3, 29.034, Point.CARTESIAN),
-                                new Point(38.5, 69.000, Point.CARTESIAN)
+                                new Point(38, 69.000, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180))
@@ -153,7 +153,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 13
                         new BezierLine(
                                 new Point(9.3, 35.900, Point.CARTESIAN),
-                                new Point(38.5, 70.00, Point.CARTESIAN)
+                                new Point(39, 70.00, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180))
@@ -163,7 +163,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 20
                         new BezierLine(
-                                new Point(38.5, 70.00, Point.CARTESIAN),
+                                new Point(38, 70.00, Point.CARTESIAN),
                                 new Point(21.692, 47.889, Point.CARTESIAN)
                         )
                 )
@@ -217,7 +217,7 @@ public class SpecimenAuto extends OpMode {
                 break;
             case 3:
                 // driving to intake sample
-                if (!mRobot.mDrive.isBusy() || (number == 1 && mRobot.mDrive.getPose().getX() < 25)){
+                if (!mRobot.mDrive.isBusy() || (number == 1 && mRobot.mDrive.getPose().getX() < 18)){
                     mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
                     mRobot.mDrive.followPath(intakeList.get(number));
                     number += 1;
@@ -260,17 +260,11 @@ public class SpecimenAuto extends OpMode {
             case 10:
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
-                    setPathState(11);
-                }
-                break;
-            case 11:
-                if (mRobot.mLift.isComplete()){
-                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
                     setPathState(13);
                 }
                 break;
             case 13:
-                if (!mRobot.mDrive.isBusy()){
+                if (!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()){
                     mRobot.mDrive.followPath(secondIntakeReadyPosition);
                     mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
                     setPathState(131);
@@ -313,7 +307,7 @@ public class SpecimenAuto extends OpMode {
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
                     if (score < 2){
-                        setPathState(11);
+                        setPathState(13);
                     } else {
                         setPathState(19);
                     }

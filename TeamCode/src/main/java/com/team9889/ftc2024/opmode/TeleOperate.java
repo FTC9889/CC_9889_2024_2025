@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.pedropathing.localization.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2024.subsystems.Intake;
 import com.team9889.ftc2024.subsystems.Lift;
@@ -20,6 +21,12 @@ public class TeleOperate extends OpMode {
     boolean something = false;
     boolean yellow = true;
     String color = "Nothing";
+    boolean clutch = false;
+
+    double unlocked = 0.8;
+    double locked = 0;
+
+    boolean somethingElse = false;
 
     Pose holdPoint = new Pose(0,0,0);
     ElapsedTime liftTimer = new ElapsedTime();
@@ -56,20 +63,8 @@ public class TeleOperate extends OpMode {
         } else if (gamepad2.dpad_down) {
             yellow = true;
         }else {
-
         }
 
-        if (gamepad1.dpad_up){
-            mRobot.mFlag.setFlagPosition(0.55);
-        }else {
-            if (!yellow) {
-                mRobot.mFlag.setFlagPosition(0.85);
-            } else {
-                mRobot.mFlag.setFlagPosition(0.9);
-            }
-        }
-
-        // Send calculated power to wheels
         if(Math.abs(-gamepad1.left_stick_y) > 0.01 ||  Math.abs(gamepad1.left_stick_x) > 0.01 || Math.abs(gamepad1.right_stick_x) > 0.01) {
             mRobot.mDrive.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
             holdPoint = mRobot.mDrive.getPose();
@@ -95,139 +90,169 @@ public class TeleOperate extends OpMode {
             }
         }
 
+        if (gamepad2.right_stick_button && gamepad2.left_stick_button) {
+                mRobot.mLift.setClutchPosition(locked);
+                clutch = true;
+        } else {
+            mRobot.mLift.setClutchPosition(unlocked);
+        }
 
+        if (clutch == true) {
+            mRobot.mLift.setElbowPosition(0.8);
 
-        if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
-            if (mRobot.mIntake.getIntakeColor() == allianceColor ||
-                    (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && yellow)) {
-                if (mRobot.mIntake.magnetSensor.getState()){
-                    mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-                    sampleInRobot = true;
-                    score = false;
+            mRobot.mLift.setLiftMotorPower(-gamepad2.left_stick_y);
+
+            mRobot.mLift.liftMotor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            mRobot.mLift.liftMotorL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            mRobot.mLift.liftMotorR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            mRobot.mLift.setHangMotorPower(-gamepad2.left_stick_y);
+        } else {
+            if (gamepad1.dpad_up){
+                mRobot.mFlag.setFlagPosition(0.55);
+            }else {
+                if (!yellow) {
+                    mRobot.mFlag.setFlagPosition(0.85);
+                } else {
+                    mRobot.mFlag.setFlagPosition(0.9);
+                }
+            }
+            // Send calculated power to wheels
+
+            if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
+                if (mRobot.mIntake.getIntakeColor() == allianceColor ||
+                        (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && yellow)) {
+                    if (mRobot.mIntake.magnetSensor.getState()){
+                        mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
+                        sampleInRobot = true;
+                        score = false;
+                    }
                 }
 
-
+                if ((((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
+                        && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION) || gamepad1.y) ){
+                    mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
+                }
             }
 
-            if ((((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
-                    && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION) || gamepad1.y) ){
-                mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
-            }
-        }
+            if (!score) {
+                if (mRobot.mIntake.getCurrentWristState() == Intake.WristState.UP_POSITION
+                        && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION) {
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_READY);
+                } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
+                        && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION) {
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
+                    mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
+                } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
+                        && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
+                        && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.TRANSFER_POSITION) {
+                    mRobot.mLift.request(Lift.TopLevelState.SCORE_PREPARE);
+                }
 
-        if (!score) {
-            if (mRobot.mIntake.getCurrentWristState() == Intake.WristState.UP_POSITION
-                    && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION) {
-                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_READY);
-            } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION) {
-                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
-                mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
-            } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
-                    && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.TRANSFER_POSITION) {
-                mRobot.mLift.request(Lift.TopLevelState.SCORE_PREPARE);
+                if (gamepad2.a && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
+                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION) {
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
+                    mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
+                }
+
+                if (gamepad1.right_bumper && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION) {
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
+                    mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
+                    sampleInRobot = false;
+                }
+
+                if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED)
+                    mRobot.mIntake.setIntakePower(0);
             }
 
-            if (gamepad2.a && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
-                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION) {
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
-                mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
-            }
-
-            if (gamepad1.right_bumper && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION) {
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
+            if(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION
+                    && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.BASKET_SCORE_READY_POSITION
+                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION && !gamepad1.right_bumper && mRobot.mLift.getCurrentDraw() < 10000) {
+                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-                sampleInRobot = false;
+                score = true;
             }
 
-            if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED)
-                mRobot.mIntake.setIntakePower(0);
-        }
-
-        if(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION
-                && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.BASKET_SCORE_READY_POSITION
-                && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION && !gamepad1.right_bumper && mRobot.mLift.getCurrentDraw() < 10000) {
-            mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-            mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-            score = true;
-        }
-
-        if (gamepad1.left_bumper
-                && (
-                (mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION)
-                        ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.DEFAULT_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.DEFAULT_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)
-                        ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.NULL && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.NULL && mRobot.mLift.getCurrentWristState() == Lift.WristState.NULL && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.NULL)
-                        ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2&& mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)
-        )
-        ){
-            mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
-            mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-        }
-
-        if (gamepad1.right_bumper
-                && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION){
-            mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_GRABED);
-            sampleInRobot = true;
-            mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
-            liftTimer.reset();
-        }
-
-        if (gamepad1.left_bumper && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
-            mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
-            liftTimer.reset();
-        } else if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION
-                && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION
-                && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
-                && liftTimer.milliseconds() > 500){
-            mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_2);
-        }
-
-
-
-        if (gamepad2.a &&
-                (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION_2
-                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION_2
-                        && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2
-                        && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
-            mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
-        }
-
-        if (gamepad1.right_bumper && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION&& mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
-            mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_SCORED);
-            something = false;
-        }
-
-        if (something && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_SCORE_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)){
-            if(gamepad1.right_bumper) {
-                mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
-                sampleInRobot = false;
+            if (gamepad1.left_bumper
+                    && (
+                    (mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.INTAKE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION)
+                            ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.DEFAULT_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.DEFAULT_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)
+                            ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.NULL && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.NULL && mRobot.mLift.getCurrentWristState() == Lift.WristState.NULL && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.NULL)
+                            ||(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2&& mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)
+            )
+            ){
+                mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
+                mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
             }
-            else if (gamepad1.left_bumper) {
+
+            if (gamepad1.right_bumper
+                    && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION){
+                mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_GRABED);
+                sampleInRobot = true;
+                mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
+                liftTimer.reset();
+            }
+
+            if (gamepad1.left_bumper && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2 && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
+                mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
+                liftTimer.reset();
+            } else if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION
+                    && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION
+                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
+                    && liftTimer.milliseconds() > 500){
+                mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_2);
+            }
+
+
+
+            if (gamepad2.a &&
+                    (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HUMAN_PLAYER_POSITION_2
+                            && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.HUMAN_PLAYER_POSITION_2
+                            && mRobot.mLift.getCurrentWristState() == Lift.WristState.HUMAN_PLAYER_POSITION_2
+                            && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
                 mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
+            }
+
+            if (gamepad1.right_bumper && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION&& mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)) {
+                mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_SCORED);
                 something = false;
             }
-        } else {
-            something = !gamepad1.right_bumper;
+
+            if (something && (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_SCORE_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION)){
+                if(gamepad1.right_bumper) {
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
+                    sampleInRobot = false;
+                }
+                else if (gamepad1.left_bumper) {
+                    mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
+                    something = false;
+                }
+            } else {
+                something = !gamepad1.right_bumper;
+            }
+
+            if ((mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_RELEASED_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION)) {
+                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+            }
+
+            if (gamepad1.a) {
+                mRobot.mIntake.requestState(Intake.TopLevelState.DEPLOY);
+                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
+                mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
+                mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
+            } else if (gamepad1.b) {
+                mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
+                score = false;
+            }
+
+            mRobot.mLift.update();
         }
 
-        if ((mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_RUNG_RELEASED_POSITION && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentWristState() == Lift.WristState.RUNG_SCORE_POSITION && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION)) {
-            mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-        }
 
-        if (gamepad1.a) {
-            mRobot.mIntake.requestState(Intake.TopLevelState.DEPLOY);
-            mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-            mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
-            mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
-            mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
-        } else if (gamepad1.b) {
-            mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-            score = false;
-        }
 
         telemetry.addData("Alliance Color", color);
 
@@ -265,7 +290,7 @@ public class TeleOperate extends OpMode {
         mRobot.mLift.setWristPosition(mRobot.mLift.RequestedWristState.getTargetPosition());
 
 
-        mRobot.mLift.update();
+
         mRobot.mIntake.update();
         mRobot.mDrive.update();
     }

@@ -22,8 +22,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public class Lift {
-    DcMotorEx liftMotorR, liftMotorL, liftMotor3;
-    Servo elbowR, elbowL, wrist, claw;
+    public DcMotorEx liftMotorR, liftMotorL, liftMotor3;
+    Servo elbowR, elbowL, wrist, claw, clutch;
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
@@ -84,7 +84,8 @@ public class Lift {
         SCORE_PREPARE(LiftState.DEFAULT_POSITION, ElbowStates.DEFAULT_POSITION, WristState.DEFAULT_POSITION, ClawStates.CLOSED_POSITION),
         HUMAN_PLAYER_POSITION(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.HUMAN_PLAYER_POSITION, WristState.HUMAN_PLAYER_POSITION, ClawStates.OPEN_POSITION),
         HUMAN_PLAYER_GRABED(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.HUMAN_PLAYER_POSITION,WristState.HUMAN_PLAYER_POSITION,ClawStates.CLOSED_POSITION),
-        HUMAN_PLAYER_2(LiftState.HUMAN_PLAYER_POSITION_2,ElbowStates.HUMAN_PLAYER_POSITION_2,WristState.HUMAN_PLAYER_POSITION_2,ClawStates.CLOSED_POSITION);
+        HUMAN_PLAYER_2(LiftState.HUMAN_PLAYER_POSITION_2,ElbowStates.HUMAN_PLAYER_POSITION_2,WristState.HUMAN_PLAYER_POSITION_2,ClawStates.CLOSED_POSITION),
+        HANG_POSITION(LiftState.HUMAN_PLAYER_POSITION, ElbowStates.INTAKE_POSITION, WristState.INTAKE_POSITION, ClawStates.CLOSED_POSITION);
 
         final LiftState liftState;
         final ElbowStates elbowStates;
@@ -108,8 +109,8 @@ public class Lift {
         DEFAULT_POSITION(0),
         LOW_RUNG_POSITION((int) (180 * 0.661)),
         HIGH_RUNG_POSITION(480),
-        HIGH_RUNG_RELEASED_POSITION((int) (500 * 0.661)),
-        HIGH_RUNG_SCORE_POSITION((int) (500 * 0.661)),
+        HIGH_RUNG_RELEASED_POSITION((int) (320)),
+        HIGH_RUNG_SCORE_POSITION((int) (320)),
         LOW_BASKET_POSITION((int) (644 * 0.661)),
         HIGH_BASKET_POSITION((int) (1478 * 0.661)),
         HUMAN_PLAYER_POSITION(30),
@@ -287,6 +288,8 @@ public class Lift {
         wrist = hardwareMap.servo.get("wrist");
         claw = hardwareMap.servo.get("claw");
 
+        clutch = hardwareMap.servo.get("clutch");
+
 //        shift1 = hardwareMap.servo.get("shift1");
 //        shift2 = hardwareMap.servo.get("shift2");
 
@@ -295,6 +298,14 @@ public class Lift {
         liftMotorR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         elbowL.setDirection(Servo.Direction.REVERSE);
+    }
+
+    public void setHangMotorPower(double power){
+        liftMotor3.setPower(power);
+    }
+
+    public void setClutchPosition(double position) {
+        clutch.setPosition(position);
     }
 
     double elbowPosition = 2;

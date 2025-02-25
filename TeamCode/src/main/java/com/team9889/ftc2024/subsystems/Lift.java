@@ -279,7 +279,7 @@ public class Lift {
     public void init(HardwareMap hardwareMap){
         liftMotorR = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftMotorR");
         liftMotorL = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftMotorL");
-//        liftMotor3 = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftmotor3");
+        liftMotor3 = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftmotor3");
 
         elbowR = hardwareMap.servo.get("elbowr");
         elbowL = hardwareMap.servo.get("elbowl");

@@ -43,8 +43,7 @@ public class SpecimenAuto extends OpMode {
     double xPoint = 9.8;
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private PathChain scorePreload;
-    private PathChain firstSample, firstTurn, secondSample, secondTurn, thirdSample, thridTurn, firstIntakeReadyPosition, firstIntakeCompletePosition, firstScore, secondIntakeReadyPosition, secondIntakeCompletePosition, secondScore, thirdScore, fourthScore, fifthScore, park;
+    private PathChain scorePreload, firstScore, secondIntakeCompletePosition, secondScore, thirdScore, fourthScore, secondIntakeReadyPosition, park, firstSamplePush, secondSamplePush;
 
 
     public void buildPaths() {
@@ -61,90 +60,44 @@ public class SpecimenAuto extends OpMode {
                 .setReversed(true)
                 .build();
 
-
-        firstSample = mRobot.mDrive.pathBuilder()
+        firstSamplePush = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 2
-                        new BezierLine(
+                        new BezierCurve(
                                 new Point(39.212, 63.740, Point.CARTESIAN),
-                                new Point(32.538, 37.043, Point.CARTESIAN)
+                                new Point(15.685, 64.575, Point.CARTESIAN),
+                                new Point(34.039, 30.035, Point.CARTESIAN),
+                                new Point(59.402, 31.537, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(-48))
-                .build();
-
-        firstTurn = mRobot.mDrive.pathBuilder()
+                .setTangentHeadingInterpolation()
                 .addPath(
                         // Line 3
-                        new BezierLine(
-                                new Point(32.538, 37.043, Point.CARTESIAN),
-                                new Point(31, 37.043, Point.CARTESIAN)
+                        new BezierCurve(
+                                new Point(59.402, 31.537, Point.CARTESIAN),
+                                new Point(63.407, 20.023, Point.CARTESIAN),
+                                new Point(14.684, 23.527, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(-48), Math.toRadians(-135))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
-        secondSample = mRobot.mDrive.pathBuilder()
+        secondSamplePush = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 4
-                        new BezierLine(
-                                new Point(31, 37.043, Point.CARTESIAN),
-                                new Point(32.538, 37.043, Point.CARTESIAN)
+                        new BezierCurve(
+                                new Point(14.684, 23.527, Point.CARTESIAN),
+                                new Point(72.250, 26.030, Point.CARTESIAN),
+                                new Point(55.564, 17.020, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-65))
-                .build();
+                .setConstantHeadingInterpolation(Math.toRadians(0))
 
-        secondTurn = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 5
                         new BezierLine(
-                                new Point(32.538, 37.043, Point.CARTESIAN),
-                                new Point(31, 37.043, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-65), Math.toRadians(-135))
-                .build();
-
-        thirdSample = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 6
-                        new BezierLine(
-                                new Point(31, 37.043, Point.CARTESIAN),
-                                new Point(32.538, 29.034, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(-70))
-                .build();
-
-        thridTurn = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 7
-                        new BezierLine(
-                                new Point(32.538, 29.034, Point.CARTESIAN),
-                                new Point(31, 29.034, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-70), Math.toRadians(-140))
-                .build();
-
-        firstIntakeReadyPosition = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 8
-                        new BezierLine(
-                                new Point(31, 29.034, Point.CARTESIAN),
-                                new Point(15, 29.034, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(-135), Math.toRadians(360))
-                .build();
-
-        firstIntakeCompletePosition = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 9
-                        new BezierLine(
-                                new Point(15, 29.034, Point.CARTESIAN),
-                                new Point(9.8, 29.034, Point.CARTESIAN)
+                                new Point(55.564, 17.020, Point.CARTESIAN),
+                                new Point(8.0, 17.020, Point.CARTESIAN)
                         )
                 )
                 .setTangentHeadingInterpolation()
@@ -155,7 +108,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(9.8, 29.034, Point.CARTESIAN),
+                                new Point(8, 17.020, Point.CARTESIAN),
                                 new Point(38.5, 68.000, Point.CARTESIAN)
                         )
                 )
@@ -164,76 +117,53 @@ public class SpecimenAuto extends OpMode {
 
         secondIntakeReadyPosition = mRobot.mDrive.pathBuilder()
                 .addPath(
-                        // Line 11
+                        // Line 12
                         new BezierLine(
-                                new Point(39.212, 68.000, Point.CARTESIAN),
-                                new Point(15, 35.900, Point.CARTESIAN)
+                                new Point(38.5, 68.000, Point.CARTESIAN),
+                                new Point(14, 35.900, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(360))
+                .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(0))
                 .build();
 
         secondIntakeCompletePosition = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 12
                         new BezierLine(
-                                new Point(15, 35.900, Point.CARTESIAN),
-                                new Point(9.5, 35.900, Point.CARTESIAN)
+                                new Point(14, 35.900, Point.CARTESIAN),
+                                new Point(9.38, 35.900, Point.CARTESIAN)
                         )
                 )
-                .setTangentHeadingInterpolation()
-                .setReversed(true)
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
         secondScore = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(9.5, 29.034, Point.CARTESIAN),
+                                new Point(9.3, 29.034, Point.CARTESIAN),
                                 new Point(38.5, 69.000, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(360), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180))
                 .build();
 
         thirdScore = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 13
                         new BezierLine(
-                                new Point(9.5, 35.900, Point.CARTESIAN),
+                                new Point(9.3, 35.900, Point.CARTESIAN),
                                 new Point(38.5, 70.00, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(360), Math.toRadians(180))
-                .build();
-
-        fourthScore = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 16
-                        new BezierLine(
-                                new Point(9.5, 35.900, Point.CARTESIAN),
-                                new Point(38.5, 71.100, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(360), Math.toRadians(180))
-                .build();
-
-        fifthScore = mRobot.mDrive.pathBuilder()
-                .addPath(
-                        // Line 19
-                        new BezierLine(
-                                new Point(9.5, 35.900, Point.CARTESIAN),
-                                new Point(38.5, 72.300, Point.CARTESIAN)
-                        )
-                )
-                .setLinearHeadingInterpolation(Math.toRadians(360), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180))
                 .build();
 
         park = mRobot.mDrive.pathBuilder()
                 .addPath(
                         // Line 20
                         new BezierLine(
-                                new Point(39.212, 72.300, Point.CARTESIAN),
+                                new Point(38.5, 70.00, Point.CARTESIAN),
                                 new Point(21.692, 47.889, Point.CARTESIAN)
                         )
                 )
@@ -270,7 +200,7 @@ public class SpecimenAuto extends OpMode {
                 mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
                 break;
             case 1:
-                if(mRobot.mDrive.getPose().getX() > 38.25) {
+                if (mRobot.mDrive.getPose().getX() > 38.25) {
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_SCORED);
                     if (mRobot.mLift.isComplete()) {
                         mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
@@ -280,104 +210,41 @@ public class SpecimenAuto extends OpMode {
                 }
                 break;
             case 2:
-                if (!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()){
+                if (!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()) {
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-                    setPathState(21);
-                }
-                break;
-            case 21:
-                FollowerConstants.headingPIDFCoefficients.setCoefficients(0.9,0,0,0);
-                // driving to intake sample
-                if(!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()) {
-                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
-                    mRobot.mDrive.followPath(intakeList.get(number));
-                    number += 1;
                     setPathState(3);
                 }
                 break;
             case 3:
-                // extending when in a certain range
-                double xE = mRobot.mDrive.getPose().getX() - intakeList.get(number).getPath(0).getLastControlPoint().getX();
-                double yE = mRobot.mDrive.getPose().getY() - intakeList.get(number).getPath(0).getLastControlPoint().getY();
-
-                if (Math.hypot(xE, yE) < 5) {
-                    mRobot.mIntake.requestState(sampleList.get(extend));
-                    extend += 1;
-                    intakeTimer.reset();
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                // extending for second position
-//                if (intakeTimer.milliseconds() > 500){
-//                    mRobot.mIntake.requestState(sampleList.get(extend));
-//                }
-
-                if (mRobot.mIntake.sampleInIntake() || intakeTimer.milliseconds() > 1000) {
+                // driving to intake sample
+                if (!mRobot.mDrive.isBusy() || (number == 1 && mRobot.mDrive.getPose().getX() < 25)){
+                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
+                    mRobot.mDrive.followPath(intakeList.get(number));
+                    number += 1;
                     setPathState(5);
-                    extend += 1;
                 }
                 break;
             case 5:
-                // slightly retracting and turning
-                if (!mRobot.mDrive.isBusy()) {
-                    mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_RETRACTED_2);
-                    if (mRobot.mIntake.isComplete()) {
-                        mRobot.mDrive.followPath(intakeList.get(number));
-                        number += 1;
-                        setPathState(51);
-                    }
-                }
-                break;
-            case 51:
-                // changing heading PID
-                if (Math.toDegrees(mRobot.mDrive.getPose().getHeading()) < 235){
-//                    FollowerConstants.headingPIDFCoefficients.setCoefficients(3,0,0.13,0);
-//                    mRobot.mDrive.breakFollowing();
-                    outtakeTimer.reset();
+                if (number < 2){
+                    setPathState(3);
+                } else {
                     setPathState(6);
                 }
+
                 break;
             case 6:
-                // outtaking and moving either to scoring or intaking samples again
-                if (outtakeTimer.milliseconds() < 250) {
-                    mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_OUTTAKE);
-                } else {
-                    if (extend < 6){
-                        setPathState(21);
-                        mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-                    } else {
-                        setPathState(7);
-                        mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
-                    }
+                if (!mRobot.mDrive.isBusy()){
+                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_GRABED);
+                    setPathState(7);
                 }
                 break;
             case 7:
-                FollowerConstants.headingPIDFCoefficients.setCoefficients(3,0,0.13,0);
-                if (!mRobot.mDrive.isBusy()){
-                    mRobot.mDrive.followPath(firstIntakeReadyPosition);
+                if (mRobot.mLift.isComplete()){
+                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_2);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if (!mRobot.mDrive.isBusy()){
-                    mRobot.mDrive.followPath(firstIntakeCompletePosition);
-                    setPathState(81);
-                }
-                break;
-            case 81:
-                if (!mRobot.mDrive.isBusy()){
-                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_GRABED);
-                    setPathState(82);
-                }
-                break;
-            case 82:
-                if (mRobot.mLift.isComplete()){
-                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_2);
-                    setPathState(83);
-                }
-                break;
-            case 83:
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
                     mRobot.mDrive.followPath(firstScore);
@@ -399,15 +266,17 @@ public class SpecimenAuto extends OpMode {
             case 11:
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
-                    setPathState(12);
+                    setPathState(13);
                 }
                 break;
-            case 12:
-                mRobot.mDrive.followPath(secondIntakeReadyPosition);
-                setPathState(13);
-                break;
             case 13:
-                if (!mRobot.mDrive.isBusy()) {
+                if (!mRobot.mDrive.isBusy()){
+                    mRobot.mDrive.followPath(secondIntakeReadyPosition);
+                    mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
+                    setPathState(131);
+                }
+            case 131:
+                if (!mRobot.mDrive.isBusy() && mRobot.mLift.isComplete()) {
                     mRobot.mDrive.followPath(secondIntakeCompletePosition);
                     setPathState(14);
                 }
@@ -428,7 +297,7 @@ public class SpecimenAuto extends OpMode {
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG);
                     mRobot.mDrive.followPath(scoreList.get(score));
-                    if (score < 4) {
+                    if (score < 2) {
                         score += 1;
                     }
                     setPathState(17);
@@ -443,10 +312,10 @@ public class SpecimenAuto extends OpMode {
             case 18:
                 if (mRobot.mLift.isComplete()){
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_RUNG_RELEASE);
-                    if (score == 4){
-                        setPathState(19);
-                    } else {
+                    if (score < 2){
                         setPathState(11);
+                    } else {
+                        setPathState(19);
                     }
                 }
                 break;
@@ -454,12 +323,14 @@ public class SpecimenAuto extends OpMode {
                 if (mRobot.mLift.isComplete()) {
                     mRobot.mDrive.followPath(park);
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-                    mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_OUTTAKE);
+                    mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_PARK_EXTEND);
                     setPathState(20);
                 }
                 break;
             case 20:
-                requestOpModeStop();
+                if (!mRobot.mDrive.isBusy()) {
+                    requestOpModeStop();
+                }
                 break;
         }
     }
@@ -545,12 +416,18 @@ public class SpecimenAuto extends OpMode {
         dashboardPoseTracker = new DashboardPoseTracker(mRobot.mDrive.poseUpdater);
 
 
+//        intakeList = new ArrayList<>(
+//                Arrays.asList(firstSample, firstTurn, secondSample, secondTurn, thirdSample, thridTurn)
+//        );
+
         intakeList = new ArrayList<>(
-                Arrays.asList(firstSample, firstTurn, secondSample, secondTurn, thirdSample, thridTurn)
+                Arrays.asList(firstSamplePush, secondSamplePush)
+//                        , thirdSample, thridTurn)
         );
 
+
         scoreList = new ArrayList<>(
-                Arrays.asList(secondScore, thirdScore, fourthScore, fifthScore)
+                Arrays.asList(secondScore, thirdScore)
         );
 
         sampleList = new ArrayList<>(
@@ -573,6 +450,7 @@ public class SpecimenAuto extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         mRobot.mDrive.setPose(startPose);
+        mRobot.mLift.setClawPosition(0.7);
         setPathState(0);
     }
 

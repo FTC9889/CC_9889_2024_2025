@@ -10,6 +10,7 @@ import com.pedropathing.util.DashboardPoseTracker;
 import com.pedropathing.util.Drawing;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -21,7 +22,8 @@ import com.team9889.lib.pedroPathing.constants.FConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.MissingResourceException;
-
+@Disabled
+@Deprecated
 @Autonomous(name = "TestSpecimenAuto", group = "Examples")
 public class TestSpecimenAuto extends OpMode {
     Robot mRobot = new Robot();

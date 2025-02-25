@@ -90,7 +90,9 @@ public class Intake {
         AUTO_SPECIMEN_2_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 500),
 
         AUTO_SPECIMEN_3(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 580),
-        AUTO_SPECIMEN_3_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 530);
+        AUTO_SPECIMEN_3_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 530),
+
+        AUTO_PARK_EXTEND(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.OFF, SampleColor.NULL, 580);
 
         final IntakeState intakeState;
         final WristState wristState;

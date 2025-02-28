@@ -26,6 +26,8 @@ public class TeleOpTest extends LinearOpMode {
 
     public static double flagPosition = 0.5;
 
+    public static double flickerPosition = 0.5;
+
     Robot mRobot = new Robot();
 
     @Override
@@ -78,6 +80,10 @@ public class TeleOpTest extends LinearOpMode {
 
             if (gamepad2.left_stick_button){
                 mRobot.mLift.setClutchPosition(clutchPositon);
+            }
+
+            if (gamepad2.back){
+                mRobot.mIntake.setFlickerPosition(flickerPosition);
             }
 
 

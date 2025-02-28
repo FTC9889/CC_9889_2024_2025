@@ -23,13 +23,21 @@ public class TeleOperate extends OpMode {
     String color = "Nothing";
     boolean clutch = false;
 
+    double x = 0;
+    double y = 0;
+
     double unlocked = 0.8;
     double locked = 0;
 
+    double sampleLock = 0.83;
+    double sampleUnlock = 0.34;
+
     boolean somethingElse = false;
+    boolean safe = false;
 
     Pose holdPoint = new Pose(0,0,0);
     ElapsedTime liftTimer = new ElapsedTime();
+    ElapsedTime lockTimer = new ElapsedTime();
 
     Intake.SampleColor allianceColor = Intake.SampleColor.RED;
     Intake.SampleColor opponentColor = Intake.SampleColor.BLUE;
@@ -62,8 +70,10 @@ public class TeleOperate extends OpMode {
             yellow = false;
         } else if (gamepad2.dpad_down) {
             yellow = true;
-        }else {
         }
+
+        safe = Math.abs(Math.hypot(mRobot.mDrive.getPose().getX() - x, mRobot.mDrive.getPose().getY() - y)) > 10;
+
 
         if(Math.abs(-gamepad1.left_stick_y) > 0.01 ||  Math.abs(gamepad1.left_stick_x) > 0.01 || Math.abs(gamepad1.right_stick_x) > 0.01) {
             mRobot.mDrive.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
@@ -122,16 +132,22 @@ public class TeleOperate extends OpMode {
             if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {
                 if (mRobot.mIntake.getIntakeColor() == allianceColor ||
                         (mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && yellow)) {
+                    if (lockTimer.milliseconds() > 500) {
+                        mRobot.mIntake.setFlickerPosition(sampleLock);
+                    }
                     if (mRobot.mIntake.magnetSensor.getState()){
                         mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                         sampleInRobot = true;
                         score = false;
                     }
+                } else {
+                    lockTimer.reset();
                 }
 
-                if ((((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
-                        && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION) || gamepad1.y) ){
-                    mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
+                if (((mRobot.mIntake.getIntakeColor() == Intake.SampleColor.NEUTRAL && !yellow) || mRobot.mIntake.getIntakeColor()  == opponentColor
+                        && mRobot.mIntake.getCurrentWristState() == Intake.WristState.DOWN_POSITION) || gamepad1.y){
+                    mRobot.mIntake.requestState(Intake.TopLevelState.TELEOP_OUTTAKE);
+                    mRobot.mIntake.setFlickerPosition(sampleUnlock);
                 }
             }
 
@@ -144,13 +160,23 @@ public class TeleOperate extends OpMode {
                         && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
                         && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION) {
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
+                    lockTimer.reset();
                     mRobot.mIntake.setIntakePower(Intake.PowerState.OFF.setTargetPower());
                 } else if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED
                         && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
                         && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.TRANSFER_POSITION
                         && mRobot.mLift.getCurrentLiftState() == Lift.LiftState.TRANSFER_POSITION) {
-                    mRobot.mLift.request(Lift.TopLevelState.SCORE_PREPARE);
+                        mRobot.mLift.request(Lift.TopLevelState.SCORE_PREPARE);
                 }
+
+//                if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.DEFAULT_POSITION
+//                        && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION
+//                        && mRobot.mLift.getCurrentWristState() ==Lift.WristState.DEFAULT_POSITION
+//                        && mRobot.mLift.getCurrentClawState() ==Lift.ClawStates.CLOSED_POSITION
+//                        && mRobot.mIntake.sampleInIntake()) {
+//                    mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
+//                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+//                }
 
                 if (gamepad2.a && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.CLOSED_POSITION
                         && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.DEFAULT_POSITION) {
@@ -162,6 +188,8 @@ public class TeleOperate extends OpMode {
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
                     mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                     sampleInRobot = false;
+                    x = mRobot.mDrive.getPose().getX();
+                    y = mRobot.mDrive.getPose().getY();
                 }
 
                 if (mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION && mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.RETRACTED)
@@ -170,7 +198,8 @@ public class TeleOperate extends OpMode {
 
             if(mRobot.mLift.getCurrentLiftState() == Lift.LiftState.HIGH_BASKET_POSITION
                     && mRobot.mLift.getCurrentElbowState() == Lift.ElbowStates.BASKET_SCORE_READY_POSITION
-                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION && !gamepad1.right_bumper && mRobot.mLift.getCurrentDraw() < 10000) {
+                    && mRobot.mLift.getCurrentClawState() == Lift.ClawStates.OPEN_POSITION
+                    && safe) {
                 mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                 score = true;
@@ -239,11 +268,19 @@ public class TeleOperate extends OpMode {
             }
 
             if (gamepad1.a) {
-                mRobot.mIntake.requestState(Intake.TopLevelState.DEPLOY);
-                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
-                mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
-                mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
-                mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
+                if (mRobot.mIntake.getCurrentSampleColor() == allianceColor || (mRobot.mIntake.getCurrentSampleColor() == Intake.SampleColor.NEUTRAL && yellow)){
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                    mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
+                    sampleInRobot = true;
+                    score = false;
+                } else {
+                    mRobot.mIntake.setFlickerPosition(sampleUnlock);
+                    mRobot.mIntake.requestState(Intake.TopLevelState.DEPLOY);
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                    mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
+                    mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
+                    mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
+                }
             } else if (gamepad1.b) {
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                 score = false;
@@ -283,6 +320,8 @@ public class TeleOperate extends OpMode {
 
         telemetry.addData("Current Lift Claw State", mRobot.mLift.getCurrentClawState());
         telemetry.addData("Requested Lift Claw State", mRobot.mLift.RequestedClawState);
+
+        telemetry.addData("pose", mRobot.mDrive.getPose());
 
 
         telemetry.update();

@@ -28,7 +28,9 @@ public class Lift {
     public DigitalChannel liftMagnetSensor;
 
     public static double lift_kp = 0.02;
-    double lift_kd = 0.02;
+    public static double lift_kd = 0.02;
+    double integralSum = 0;
+    public static double lift_ki =  0.02;
 
     public LiftState CurrentLiftState = LiftState.NULL;
     public LiftState RequestedLiftState = LiftState.NULL;
@@ -280,7 +282,7 @@ public class Lift {
     public void init(HardwareMap hardwareMap){
         liftMotorR = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftMotorR");
         liftMotorL = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftMotorL");
-        liftMotor3 = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftmotor3");
+        liftMotor3 = (DcMotorEx) hardwareMap.get(DcMotor.class, "liftMotor3");
 
         elbowR = hardwareMap.servo.get("elbowr");
         elbowL = hardwareMap.servo.get("elbowl");
@@ -488,7 +490,10 @@ public class Lift {
         double error = liftTargetPosition - currentLiftPosition();
         if(liftTargetPosition != 0) {
 
-            power = lift_kp * error;
+            if (liftTimer != null)
+                integralSum = integralSum + (error * liftTimer.seconds());
+
+            power = lift_kp * error + (lift_ki * integralSum);
             power = Math.min(power, 1);
 
             setLiftMotorPower(power);
@@ -513,6 +518,8 @@ public class Lift {
             } else {
                 power = -0.5;
             }
+
+            integralSum = 0;
 
             setLiftMotorPower(power);
         }

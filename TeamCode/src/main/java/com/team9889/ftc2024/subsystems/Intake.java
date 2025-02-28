@@ -18,8 +18,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 public class Intake {
+
+    double sampleLock = 0.83;
+    double sampleUnlock = 0.34;
+
+
     public DcMotorEx extension;
-    Servo intakeWristR, intakeWristL, intakeLock;
+    public Servo intakeWristR, intakeWristL, intakeLock, flicker;
     CRServo intakeR, intakeL;
     public DigitalChannel magnetSensor;
     public RevColorSensorV3 colorSensor;
@@ -78,6 +83,7 @@ public class Intake {
         AUTO_RETRACTED_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.ON, SampleColor.NULL, 200),
 
         OUTTAKE(IntakeState.RETRACTED, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
+        TELEOP_OUTTAKE(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
         AUTO_OUTTAKE(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL, 580),
 
         AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0),
@@ -199,7 +205,7 @@ public class Intake {
         ON(-1),
         OFF(0),
         SLOW(-0.15),
-        OUTTAKE(0.5),
+        OUTTAKE(1),
         SLOWOUTTAKE(0.1),
         NULL(0);
 
@@ -245,6 +251,8 @@ public class Intake {
 
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
 
+        flicker = hardwareMap.servo.get("flicker");
+
         intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intakeWristL.setDirection(Servo.Direction.REVERSE);
@@ -277,6 +285,10 @@ public class Intake {
             extension.setPower(powerLevel);
             extensionPower = powerLevel;
         }
+    }
+
+    public void setFlickerPosition(double position){
+        flicker.setPosition(position);
     }
 
     double intakePower = 2;

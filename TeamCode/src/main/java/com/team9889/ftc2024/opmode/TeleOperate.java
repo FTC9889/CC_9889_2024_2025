@@ -1,4 +1,6 @@
 package com.team9889.ftc2024.opmode;
+import android.accounts.AccountAuthenticatorResponse;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.pedropathing.localization.Pose;
@@ -45,6 +47,8 @@ public class TeleOperate extends OpMode {
     @Override
     public void init() {
         mRobot.init(hardwareMap);
+        mRobot.mIntake.auto = false;
+
         mRobot.mDrive.setStartingPose(Robot.robotPose);
     }
 
@@ -297,6 +301,7 @@ public class TeleOperate extends OpMode {
         telemetry.addData("LastGoodState", mRobot.mLift.lastLiftStateThatWasGood());
 
         telemetry.addData("Lift Position", mRobot.mLift.currentLiftPosition());
+        telemetry.addData("Intake Position", mRobot.mIntake.extension.getCurrentPosition());
 
         telemetry.addData("Current Intake State", mRobot.mIntake.getCurrentIntakeState());
         telemetry.addData("Requested Intake State", mRobot.mIntake.RequestedIntakeState);

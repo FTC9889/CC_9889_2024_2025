@@ -16,6 +16,6 @@ public class Flag {
     public void setFlagPosition(double position){
         flag.setPosition(position);
     }
-    //flg deployed 0.65
-    //flg initial 0.93
+    //flg deployed 0.5
+    //flg initial 0
 }

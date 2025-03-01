@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.MissingResourceException;
 
-@Autonomous(name = "SpecimenAuto", group = "Examples")
+@Autonomous(name = "SpecimenAuto", group = "Examples", preselectTeleOp = "TeleOperate")
 public class SpecimenAuto extends OpMode {
     Robot mRobot = new Robot();
 
@@ -190,6 +190,8 @@ public class SpecimenAuto extends OpMode {
     int number = 0;
     int extend = 0;
     int score = 0;
+
+
 
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -405,6 +407,7 @@ public class SpecimenAuto extends OpMode {
 
 
         mRobot.init(hardwareMap);
+        mRobot.mIntake.auto = true;
         mRobot.mDrive.setStartingPose(startPose);
         buildPaths();
         dashboardPoseTracker = new DashboardPoseTracker(mRobot.mDrive.poseUpdater);
@@ -422,10 +425,6 @@ public class SpecimenAuto extends OpMode {
 
         scoreList = new ArrayList<>(
                 Arrays.asList(secondScore, thirdScore)
-        );
-
-        sampleList = new ArrayList<>(
-                Arrays.asList(Intake.TopLevelState.AUTO_SPECIMEN_1, Intake.TopLevelState.AUTO_SPECIMEN_1_2, Intake.TopLevelState.AUTO_SPECIMEN_2, Intake.TopLevelState.AUTO_SPECIMEN_2_2, Intake.TopLevelState.AUTO_SPECIMEN_3, Intake.TopLevelState.AUTO_SPECIMEN_3_2)
         );
 
         mRobot.mIntake.setIntakeWristPosition(Intake.WristState.UP_POSITION.getTargetPosition());

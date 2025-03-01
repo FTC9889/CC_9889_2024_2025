@@ -22,6 +22,8 @@ public class Intake {
     double sampleLock = 0.83;
     double sampleUnlock = 0.34;
 
+    public boolean auto = false;
+
 
     public DcMotorEx extension;
     public Servo intakeWristR, intakeWristL, intakeLock, flicker;
@@ -84,7 +86,7 @@ public class Intake {
 
         OUTTAKE(IntakeState.RETRACTED, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
         TELEOP_OUTTAKE(IntakeState.INTAKE, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
-        AUTO_OUTTAKE(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.MIDDLE_POSITION, PowerState.OUTTAKE, SampleColor.NULL, 580),
+        AUTO_OUTTAKE(IntakeState.RETRACTED, WristState.UP_POSITION, PowerState.OUTTAKE, SampleColor.NULL, 580),
 
         AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0),
         DEPLOY(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL),
@@ -419,14 +421,18 @@ public class Intake {
             if (!magnetSensor.getState()) {
                 setExtensionLockPosition(closedPosition);
                 extension.setPower(0);
-                setRequstedPowerState(PowerState.OFF);
+                if (auto){
+                    setRequstedPowerState(PowerState.OFF);
+                } else {
+                    setRequstedPowerState(PowerState.ON);
+                }
                 CurrentIntakeState = RequestedIntakeState;
             } else if (CurrentIntakeState != IntakeState.RETRACTED){
                     setExtensionLockPosition(openPosition);
 
 
                 if (extension.getCurrentPosition() < 100){
-                    extension.setPower(-0.5);
+                    extension.setPower(-0.7);
                     setRequstedWristState(WristState.UP_POSITION);
                     setRequstedPowerState(PowerState.ON);
                 }else {
@@ -436,29 +442,25 @@ public class Intake {
             }
         }
 
+
+
+
         // Auto Extend
-        if (RequestedIntakeState == IntakeState.AUTO_EXTEND || RequestedIntakeState == IntakeState.AUTO_SPECIMEN_EXTEND) {
-            if (lockTimer3.milliseconds() < 50) {
-                if (target == 0){
-                    setExtensionLockPosition(closedPosition);
-                } else {
-                    setExtensionLockPosition(openPosition);
-                }
+        if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
+            if (Math.abs(extension.getCurrentPosition() - target) < 40) {
+                extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                extension.setTargetPosition(target);
+                extension.setPower(0);
+                setExtensionLockPosition(closedPosition);
+
+                CurrentIntakeState = RequestedIntakeState;
             } else {
+                setExtensionLockPosition(openPosition);
                 extension.setTargetPosition(target);
                 extension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 extension.setPower(0.8);
             }
 
-            if (Math.abs(extension.getCurrentPosition() - target) < 40) {
-                extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                extension.setTargetPosition(target);
-                extension.setPower(0);
-                CurrentIntakeState = RequestedIntakeState;
-            }
-
-        } else {
-            lockTimer3.reset();
         }
 
         // Intake Power State

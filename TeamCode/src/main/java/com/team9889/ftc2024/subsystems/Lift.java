@@ -2,6 +2,7 @@ package com.team9889.ftc2024.subsystems;
 
 
 import static com.team9889.ftc2024.subsystems.Lift.LiftState.HIGH_BASKET_POSITION;
+import static com.team9889.ftc2024.subsystems.Lift.LiftState.HIGH_RUNG_POSITION;
 import static com.team9889.ftc2024.subsystems.Lift.LiftState.INTAKE_POSITION;
 
 import androidx.annotation.NonNull;
@@ -374,6 +375,9 @@ public class Lift {
     }
 
     private boolean liftInPosition() {
+        if (RequestedLiftState == HIGH_BASKET_POSITION) {
+            return liftTargetPosition < currentLiftPosition();
+        }
         return Math.abs(liftTargetPosition - currentLiftPosition()) <= 40;
     }
 
@@ -493,7 +497,16 @@ public class Lift {
             if (liftTimer != null)
                 integralSum = integralSum + (error * liftTimer.seconds());
 
-            power = lift_kp * error + (lift_ki * integralSum);
+            power = lift_kp * error;
+
+            if (RequestedLiftState == HIGH_BASKET_POSITION){
+                power += lift_ki * integralSum;
+            } else if (RequestedLiftState == HIGH_RUNG_POSITION) {
+                power += (lift_ki/2) * integralSum;
+            } else  {
+                integralSum = 0;
+            }
+
             power = Math.min(power, 1);
 
             setLiftMotorPower(power);

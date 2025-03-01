@@ -1,9 +1,10 @@
 package com.team9889.ftc2024.test;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2024.subsystems.Robot;
-
+@Disabled
 @TeleOp
 public class TestUltrasonicSensor extends OpMode {
     Robot mRobot = new Robot();
@@ -17,7 +18,6 @@ public class TestUltrasonicSensor extends OpMode {
     public void loop() {
         mRobot.mDrive.update();
 
-        telemetry.addData("ultrasonic Sensor", mRobot.getDistance());
 
         telemetry.addData("x", mRobot.mDrive.getPose().getX());
         telemetry.addData("y", mRobot.mDrive.getPose().getY());

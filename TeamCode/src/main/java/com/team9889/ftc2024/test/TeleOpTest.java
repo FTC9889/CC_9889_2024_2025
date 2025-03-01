@@ -1,12 +1,13 @@
 package com.team9889.ftc2024.test;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2024.subsystems.Robot;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
+@Disabled
 @TeleOp
 @Config
 public class TeleOpTest extends LinearOpMode {
@@ -84,6 +85,10 @@ public class TeleOpTest extends LinearOpMode {
 
             if (gamepad2.back){
                 mRobot.mIntake.setFlickerPosition(flickerPosition);
+            }
+
+            if (gamepad2.right_bumper){
+                mRobot.mFlag.setFlagPosition(flagPosition);
             }
 
 

@@ -10,7 +10,7 @@ import com.team9889.lib.pedroPathing.constants.FConstants;
 import com.team9889.lib.pedroPathing.constants.LConstants;
 
 public class Robot {
-    AnalogInput ultrasonicSensor;
+//    AnalogInput ultrasonicSensor;
 
 
 
@@ -31,14 +31,14 @@ public class Robot {
         return ((voltage * 100) / 5.0) * 0.3937;
     }
 
-    public double getDistance() {
-        return (41.2 * ultrasonicSensor.getVoltage() - 1.32 + 7.25) * Math.cos(mDrive.getPose().getHeading());
-//                * 63.202 + 0.0626 + 3.25)
-//                * Math.sin(mDrive.getPose().getHeading());
-    }
-
+//    public double getDistance() {
+//        return (41.2 * ultrasonicSensor.getVoltage() - 1.32 + 7.25) * Math.cos(mDrive.getPose().getHeading());
+////                * 63.202 + 0.0626 + 3.25)
+////                * Math.sin(mDrive.getPose().getHeading());
+//    }
+//
     public void init(HardwareMap hardwareMap) {
-        ultrasonicSensor = hardwareMap.get(AnalogInput.class, "ultrasonic");
+//        ultrasonicSensor = hardwareMap.get(AnalogInput.class, "ultrasonic");
 
         Constants.setConstants(FConstants.class, LConstants.class);
         mDrive = new Follower(hardwareMap);

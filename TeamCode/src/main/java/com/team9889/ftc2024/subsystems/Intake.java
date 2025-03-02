@@ -23,6 +23,7 @@ public class Intake {
     double sampleUnlock = 0.34;
 
     public boolean auto = false;
+    public boolean powerAllowed = true;
 
 
     public DcMotorEx extension;
@@ -90,6 +91,7 @@ public class Intake {
 
         AUTO_SAMPLE(IntakeState.AUTO_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 0),
         DEPLOY(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL),
+        DEPLOYED_OUTTAKE(IntakeState.INTAKE, WristState.DOWN_POSITION, PowerState.OUTTAKE, SampleColor.NULL),
 
         AUTO_SPECIMEN_1(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 240),
         AUTO_SPECIMEN_1_2(IntakeState.AUTO_SPECIMEN_EXTEND, WristState.DOWN_POSITION, PowerState.ON, SampleColor.NULL, 190),
@@ -260,6 +262,8 @@ public class Intake {
         intakeWristL.setDirection(Servo.Direction.REVERSE);
 
         extension.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        powerAllowed = true;
 
         if (magnetSensor.getState() == false) {
             extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -450,9 +454,6 @@ public class Intake {
             }
         }
 
-
-
-
         // Auto Extend
         if (RequestedIntakeState == IntakeState.AUTO_EXTEND) {
             if (Math.abs(extension.getCurrentPosition() - target) < 40) {
@@ -472,10 +473,10 @@ public class Intake {
         }
 
         // Intake Power State
-        if (RequstedPowerState != CurrentPowerState) {
+        if(powerAllowed) {
             setIntakePower(RequstedPowerState.setTargetPower());
-            CurrentPowerState = RequstedPowerState;
         }
+        CurrentPowerState = RequstedPowerState;
 
         allowDriverExtension = CurrentIntakeState == IntakeState.INTAKE && RequestedIntakeState == IntakeState.INTAKE;
     }

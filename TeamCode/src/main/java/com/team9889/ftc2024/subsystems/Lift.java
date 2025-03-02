@@ -28,10 +28,10 @@ public class Lift {
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
-    public static double lift_kp = 0.03;
+    public static double lift_kp = 0.027;
     public static double lift_kd = 0.02;
     double integralSum = 0;
-    public static double lift_ki =  0.02;
+    public static double lift_ki =  0.01;
 
     public LiftState CurrentLiftState = LiftState.NULL;
     public LiftState RequestedLiftState = LiftState.NULL;
@@ -110,15 +110,15 @@ public class Lift {
         NULL(0),
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
-        LOW_RUNG_POSITION((int) (180 * 0.661)),
-        HIGH_RUNG_POSITION(490),
-        HIGH_RUNG_RELEASED_POSITION((int) (320)),
-        HIGH_RUNG_SCORE_POSITION((int) (320)),
-        LOW_BASKET_POSITION((int) (644 * 0.661)),
-        HIGH_BASKET_POSITION((int) (1478 * 0.661)),
-        HUMAN_PLAYER_POSITION(30),
-        HUMAN_PLAYER_POSITION_2(50),
-        LEVEL_ONE_ASSENT_POSITION((int) (497 * 0.661)),
+        LOW_RUNG_POSITION(169),
+        HIGH_RUNG_POSITION(680),
+        HIGH_RUNG_RELEASED_POSITION(455),
+        HIGH_RUNG_SCORE_POSITION(455),
+        LOW_BASKET_POSITION(605),
+        HIGH_BASKET_POSITION(1380),
+        HUMAN_PLAYER_POSITION(43),
+        HUMAN_PLAYER_POSITION_2(71),
+        LEVEL_ONE_ASSENT_POSITION(468),
         TRANSFER_POSITION(0);
 
         private final int value;
@@ -324,10 +324,7 @@ public class Lift {
 
     double wristPosition = 2;
     public void setWristPosition(double position){
-//        if(wristPosition != position)
             wrist.setPosition(position);
-
-//        wristPosition = position;
     }
 
     double clawPosition = 2;
@@ -358,7 +355,6 @@ public class Lift {
             offset = liftMotorR.getCurrentPosition();
         } else {
             setMotorPower(power);
-
         }
     }
 
@@ -378,24 +374,9 @@ public class Lift {
 
     private boolean liftInPosition() {
         if (RequestedLiftState == HIGH_BASKET_POSITION) {
-            return liftTargetPosition < currentLiftPosition();
+            return currentLiftPosition() > liftTargetPosition - 30;
         }
         return Math.abs(liftTargetPosition - currentLiftPosition()) <= 40;
-    }
-
-    private boolean wristInPosition = false;
-    private boolean wristInPosition() {
-        return wristInPosition;
-    }
-
-    private boolean elbowInPosition= false;
-    private boolean elbowInPosition() {
-        return elbowInPosition;
-    }
-
-    private boolean clawInPosition = false;
-    private boolean clawInPosition() {
-        return clawInPosition;
     }
 
     private int liftTargetPosition = 0;

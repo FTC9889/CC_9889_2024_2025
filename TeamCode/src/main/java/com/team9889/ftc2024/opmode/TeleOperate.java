@@ -329,7 +329,22 @@ public class TeleOperate extends OpMode {
             } else if (gamepad1.b) {
                 mRobot.mIntake.requestState(Intake.TopLevelState.RETRACTION);
                 score = false;
+            } else if(gamepad1.x) { // Outtake
+                mRobot.mIntake.setFlickerPosition(sampleUnlock);
+                mRobot.mIntake.requestState(Intake.TopLevelState.DEPLOYED_OUTTAKE);
+                mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+
+                mRobot.mIntake.CurrentIntakeState = Intake.IntakeState.RETRACTED;
+                mRobot.mIntake.CurrentWristState = Intake.WristState.UP_POSITION;
+                mRobot.mIntake.CurrentPowerState = Intake.PowerState.OFF;
+                mRobot.mIntake.auto = true;
             }
+
+            if(gamepad2.y) {
+                mRobot.mIntake.setIntakePower(-1);
+                mRobot.mIntake.powerAllowed = false;
+            } else
+                mRobot.mIntake.powerAllowed = true;
 
             mRobot.mLift.update();
         }

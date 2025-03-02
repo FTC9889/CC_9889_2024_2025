@@ -28,7 +28,7 @@ public class Lift {
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
-    public static double lift_kp = 0.02;
+    public static double lift_kp = 0.03;
     public static double lift_kd = 0.02;
     double integralSum = 0;
     public static double lift_ki =  0.02;
@@ -111,7 +111,7 @@ public class Lift {
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
         LOW_RUNG_POSITION((int) (180 * 0.661)),
-        HIGH_RUNG_POSITION(480),
+        HIGH_RUNG_POSITION(490),
         HIGH_RUNG_RELEASED_POSITION((int) (320)),
         HIGH_RUNG_SCORE_POSITION((int) (320)),
         LOW_BASKET_POSITION((int) (644 * 0.661)),
@@ -154,6 +154,8 @@ public class Lift {
                     return "TRANSFER_POSITION";
                 case LEVEL_ONE_ASSENT_POSITION:
                     return "LEVEL_ONE_ASSENT_POSITION";
+                case HUMAN_PLAYER_POSITION_2:
+                    return "HUMAN_PLAYER_POSITION_2";
                 case NULL:
                 default:
                     return "NULL";
@@ -198,7 +200,8 @@ public class Lift {
                     return " DEFAULT_POSITION";
                 case   TRANSFER_POSITION:
                     return " TRANSFER_POSITION";
-
+                case HUMAN_PLAYER_POSITION_2:
+                    return " HUMAN_PLAYER_POSITION_2";
                 case NULL:
                 default:
                     return "NULL";
@@ -213,9 +216,10 @@ public class Lift {
         HUMAN_PLAYER_POSITION_2(0.6),
         RUNG_SCORE_POSITION(0.85),
         BASKET_SCORE_POSITION(0.425),
-        BASKET_SCORE_READY_POSITION(0.65),
+        BASKET_SCORE_READY_POSITION(0.5),
         DEFAULT_POSITION(0.85),
-        TRANSFER_POSITION(0.3);
+        TRANSFER_POSITION(0.3),
+        FIRST_SCORE(0.2);
 
         private final double value;
         WristState(double value) {
@@ -242,7 +246,8 @@ public class Lift {
                     return " DEFAULT_POSITION";
                 case   TRANSFER_POSITION:
                     return " TRANSFER_POSITION";
-
+                case HUMAN_PLAYER_POSITION_2:
+                    return " HUMAN_PLAYER_POSITION_2";
                 case NULL:
                 default:
                     return "NULL";
@@ -292,9 +297,6 @@ public class Lift {
         claw = hardwareMap.servo.get("claw");
 
         clutch = hardwareMap.servo.get("clutch");
-
-//        shift1 = hardwareMap.servo.get("shift1");
-//        shift2 = hardwareMap.servo.get("shift2");
 
         liftMagnetSensor = hardwareMap.digitalChannel.get("liftMagnetSensor");
 
@@ -422,11 +424,14 @@ public class Lift {
     static ElapsedTime clawTimer = new ElapsedTime();
     static boolean resetClawTimer = false;
 
+    public boolean takeover = false;
+
     /**
      * update = lift controller
      */
     public void update() {
-        setWristPosition(RequestedWristState.getTargetPosition());
+        if (!takeover)
+            setWristPosition(RequestedWristState.getTargetPosition());
 
         if (RequestedWristState != CurrentWristState) {
 
@@ -436,14 +441,12 @@ public class Lift {
             }
 
             if(wristTimer.seconds() >
-                    0.1 * Math.abs(RequestedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
+                    0.2 * Math.abs(RequestedWristState.getTargetPosition() - CurrentWristState.getTargetPosition()))
                 CurrentWristState = RequestedWristState;
 
         } else {
             resetWristTimer = true;
         }
-
-//        RobotLog.d("Timer: "+ wristTimer.seconds());
 
         if (RequestedElbowState != CurrentElbowState) {
             if(RequestedLiftState == HIGH_BASKET_POSITION && !liftInPosition()) {
@@ -457,7 +460,7 @@ public class Lift {
                 }
 
                 if(elbowTimer.seconds() >
-                        0.1 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
+                        0.2 * Math.abs(RequestedElbowState.getTargetPosition() - CurrentElbowState.getTargetPosition()))
                     CurrentElbowState = RequestedElbowState;
             }
         } else {
@@ -473,7 +476,7 @@ public class Lift {
             }
 
             if(clawTimer.seconds() >
-                    0.5 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
+                    0.8 * Math.abs(RequestedClawState.getTargetPosition() - CurrentClawState.getTargetPosition()))
                 CurrentClawState = RequestedClawState;
         } else {
             resetClawTimer = false;
@@ -494,7 +497,7 @@ public class Lift {
         double error = liftTargetPosition - currentLiftPosition();
         if(liftTargetPosition != 0) {
 
-            if (liftTimer != null)
+            if (liftTimer != null && Math.abs(error) < 200)
                 integralSum = integralSum + (error * liftTimer.seconds());
 
             power = lift_kp * error;

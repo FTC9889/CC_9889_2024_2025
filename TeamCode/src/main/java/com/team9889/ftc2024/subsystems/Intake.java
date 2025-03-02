@@ -279,6 +279,9 @@ public class Intake {
         double powerLevel;
         if (!magnetSensor.getState() && power < 0){
             powerLevel = 0;
+
+            extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }else {
             powerLevel = power;
         }
@@ -421,11 +424,16 @@ public class Intake {
             if (!magnetSensor.getState()) {
                 setExtensionLockPosition(closedPosition);
                 extension.setPower(0);
+
                 if (auto){
                     setRequstedPowerState(PowerState.OFF);
                 } else {
                     setRequstedPowerState(PowerState.ON);
                 }
+
+                extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
                 CurrentIntakeState = RequestedIntakeState;
             } else if (CurrentIntakeState != IntakeState.RETRACTED){
                     setExtensionLockPosition(openPosition);

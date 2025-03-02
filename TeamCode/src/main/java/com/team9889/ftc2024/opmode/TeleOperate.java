@@ -341,6 +341,9 @@ public class TeleOperate extends OpMode {
             }
 
             if(gamepad2.y) {
+                mRobot.mIntake.setIntakePower(1);
+                mRobot.mIntake.powerAllowed = false;
+            } else if(gamepad2.x) {
                 mRobot.mIntake.setIntakePower(-1);
                 mRobot.mIntake.powerAllowed = false;
             } else

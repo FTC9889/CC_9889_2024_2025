@@ -39,7 +39,7 @@ public class BasketAuto extends OpMode {
 
     private final Pose startPose = new Pose(7.84, 103.45, Math.toRadians(-90));
 
-    private final Pose scorePoint = new Pose(14, 130, Math.toRadians(-45));
+    private final Pose scorePoint = new Pose(15, 128, Math.toRadians(-45));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private PathChain scorePreload;
@@ -131,7 +131,7 @@ public class BasketAuto extends OpMode {
                         // Line 6
                         new BezierLine(
                                 new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN),
-                                new Point(42, 132, Point.CARTESIAN)
+                                new Point(40, 132, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(50))
@@ -141,11 +141,11 @@ public class BasketAuto extends OpMode {
                 .addPath(
                         // Line 6
                         new BezierLine(
-                                new Point(42, 132, Point.CARTESIAN),
+                                new Point(40, 132, Point.CARTESIAN),
                                 new Point(45.22, 125, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(-45), Math.toRadians(90))
+                .setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(90))
                 .build();
 
         scoreFourthSample = mRobot.mDrive.pathBuilder()
@@ -156,7 +156,7 @@ public class BasketAuto extends OpMode {
                                 new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), scorePoint.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(90), scorePoint.getHeading())
                 .build();
 
         park = mRobot.mDrive.pathBuilder()
@@ -185,6 +185,7 @@ public class BasketAuto extends OpMode {
     ElapsedTime anotherTimer = new ElapsedTime();
     ElapsedTime retractionTimer = new ElapsedTime();
     ElapsedTime otherOtherTimer = new ElapsedTime();
+    ElapsedTime otherOtherOtherTimer = new ElapsedTime();
 
 
     boolean up = true;
@@ -197,36 +198,33 @@ public class BasketAuto extends OpMode {
                 setPathState(1);
                 mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET);
                 mRobot.mIntake.requestState(Intake.TopLevelState.OUTTAKE);
-                timer.reset();
                 break;
             case 1:
                 if (!mRobot.mDrive.isBusy()) {
                     mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_READY);
-                    if (timer.milliseconds() > 500) {
-                        setPathState(11);
-                    }
-                } else {
-                    timer.reset();
+                    setPathState(111);
                 }
+                break;
+            case 111:
+                setPathState(11);
+                timer.reset();
                 break;
             case 11:
                 if (mRobot.mLift.isComplete()) {
-                    mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
-                    mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_RETRACTED);
-                    setPathState(111);
-                }
-
-                break;
-            case 111:
-                if (scoreTimer.milliseconds() > 500) {
-                    setPathState(1111);
+                    if (timer.milliseconds() > 500) {
+                        mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET_RELEASE);
+                        mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_RETRACTED);
+                        setPathState(1111);
+                    }
+                } else {
+                    timer.reset();
                 }
                 break;
             case 1111:
                 if (sampleNumber == 3) {
                     if (mRobot.mLift.isComplete()) {
                         setPathState(1000);
-                        mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                        mRobot.mDrive.followPath(park, true);
                     }
                 } else {
                     setPathState(112);
@@ -240,7 +238,7 @@ public class BasketAuto extends OpMode {
                 }
                 break;
             case 113:
-                if (mRobot.mDrive.getPose().getX() > 22) {
+                if (mRobot.mDrive.getPose().getX() > 20) {
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
                     timer.reset();
                     if (pickupNumber < 6) {
@@ -256,10 +254,11 @@ public class BasketAuto extends OpMode {
                 if (!mRobot.mDrive.isBusy() && mRobot.mIntake.isComplete()) {
                     mRobot.mDrive.followPath(pickupList.get(pickupNumber), true);
                     setPathState(3);
+                    timer.reset();
                 }
                 break;
             case 3:
-                if (mRobot.mIntake.sampleInIntake() || timer.milliseconds() > 1000) {
+                if (mRobot.mIntake.sampleInIntake() || timer.milliseconds() > 500) {
                     setPathState(4);
                 }
                 break;
@@ -287,7 +286,7 @@ public class BasketAuto extends OpMode {
                 break;
             case 6:
                 if (mRobot.mLift.isComplete() && mRobot.mIntake.isComplete()) {
-                    if (anotherTimer.milliseconds() > 500) {
+                    if (anotherTimer.milliseconds() > 200) {
                         mRobot.mLift.request(Lift.TopLevelState.TRANSFER_COMPLETE);
                         timer.reset();
                         otherOtherTimer.reset();
@@ -299,7 +298,7 @@ public class BasketAuto extends OpMode {
                 break;
             case 61:
                 if (mRobot.mLift.isComplete()) {
-                    if (otherOtherTimer.milliseconds() > 750) {
+                    if (otherOtherTimer.milliseconds() > 200) {
                         mRobot.mLift.request(Lift.TopLevelState.SCORE_PREPARE);
                         timer.reset();
                         setPathState(7);
@@ -322,7 +321,7 @@ public class BasketAuto extends OpMode {
                         setPathState(5);
                         value = 0;
                     } else {
-                        timer.reset();
+                        otherOtherOtherTimer.reset();
                         setPathState(7);
                         value = 0;
                     }
@@ -331,11 +330,12 @@ public class BasketAuto extends OpMode {
             case 7:
                 if(mRobot.mLift.isComplete() && !mRobot.mDrive.isBusy()) {
                     mRobot.mIntake.setFlickerPosition(0.34);
-                    if (timer.milliseconds() > 500) {
+                    if (otherOtherOtherTimer.milliseconds() > 500) {
                         sampleNumber += 1;
                         pickupNumber += 1;
                         mRobot.mLift.request(Lift.TopLevelState.HIGH_BASKET);
                         mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_OUTTAKE);
+                        timer.reset();
                         setPathState(1);
                     }
                 }
@@ -349,9 +349,11 @@ public class BasketAuto extends OpMode {
                 break;
 
             case 1000:
-                mRobot.mDrive.followPath(park, true);
-                setPathState(1001);
-                anotherTimer.reset();
+                if (mRobot.mDrive.getPose().getX() > 20) {
+                    mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
+                    setPathState(1001);
+                    anotherTimer.reset();
+                }
                 break;
             case 1001:
 //                if (!mRobot.mDrive.isBusy()) {

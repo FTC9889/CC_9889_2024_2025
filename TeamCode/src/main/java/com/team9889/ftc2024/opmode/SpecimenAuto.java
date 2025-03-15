@@ -97,7 +97,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 5
                         new BezierLine(
                                 new Point(55.564, 15.020, Point.CARTESIAN),
-                                new Point(8.0, 19.020, Point.CARTESIAN)
+                                new Point(10.5, 19.020, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -108,7 +108,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(8, 17.020, Point.CARTESIAN),
+                                new Point(10.5, 17.020, Point.CARTESIAN),
                                 new Point(38.5, 68.000, Point.CARTESIAN)
                         )
                 )
@@ -131,7 +131,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 12
                         new BezierLine(
                                 new Point(14, 35.900, Point.CARTESIAN),
-                                new Point(9.38, 35.900, Point.CARTESIAN)
+                                new Point(10.5, 35.900, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -141,7 +141,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(9.3, 29.034, Point.CARTESIAN),
+                                new Point(10.5, 35.900, Point.CARTESIAN),
                                 new Point(38, 69.000, Point.CARTESIAN)
                         )
                 )
@@ -152,8 +152,8 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 13
                         new BezierLine(
-                                new Point(9.3, 35.900, Point.CARTESIAN),
-                                new Point(39, 70.00, Point.CARTESIAN)
+                                new Point(10.5, 35.900, Point.CARTESIAN),
+                                new Point(38, 70.00, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(180))
@@ -164,10 +164,11 @@ public class SpecimenAuto extends OpMode {
                         // Line 20
                         new BezierLine(
                                 new Point(38, 70.00, Point.CARTESIAN),
-                                new Point(21.692, 47.889, Point.CARTESIAN)
+//                                new Point(21.692, 47.889, Point.CARTESIAN)
+                                new Point(10, 10, Point.CARTESIAN)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-135))
+                .setTangentHeadingInterpolation()
                 .build();
     }
 
@@ -219,7 +220,7 @@ public class SpecimenAuto extends OpMode {
                 break;
             case 3:
                 // driving to intake sample
-                if (!mRobot.mDrive.isBusy() || (number == 1 && mRobot.mDrive.getPose().getX() < 18)){
+                if (!mRobot.mDrive.isBusy() || (number < 2 && mRobot.mDrive.getPose().getX() < 18)){
                     mRobot.mLift.request(Lift.TopLevelState.HUMAN_PLAYER_POSITION);
                     mRobot.mDrive.followPath(intakeList.get(number));
                     number += 1;
@@ -321,10 +322,11 @@ public class SpecimenAuto extends OpMode {
                     mRobot.mLift.request(Lift.TopLevelState.TRANSFER_PREPARE);
                     mRobot.mIntake.requestState(Intake.TopLevelState.AUTO_PARK_EXTEND);
                     setPathState(20);
+                    timer.reset();
                 }
                 break;
             case 20:
-                if (!mRobot.mDrive.isBusy()) {
+                if (!mRobot.mDrive.isBusy() && mRobot.mIntake.isComplete() && timer.milliseconds() > 100000000) {
                     requestOpModeStop();
                 }
                 break;
@@ -344,9 +346,6 @@ public class SpecimenAuto extends OpMode {
         mRobot.mDrive.update();
         autonomousPathUpdate();
 
-//        if () {
-//            requestOpModeStop();
-//        }
         RobotLog.d("Time: " + opmodeTimer.getElapsedTimeSeconds() +
 //                " | Path state: ", pathState +
                 " | Is Nan: " +  mRobot.mDrive.isLocalizationNAN() +

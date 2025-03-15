@@ -24,6 +24,7 @@ public class Intake {
 
     public boolean auto = false;
     public boolean powerAllowed = true;
+    public boolean disableColorsensor = false;
 
 
     public DcMotorEx extension;

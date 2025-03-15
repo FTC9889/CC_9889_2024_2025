@@ -37,6 +37,8 @@ public class TeleOperate extends OpMode {
     ElapsedTime timer = new ElapsedTime();
     boolean somethingElse = false;
     boolean safe = false;
+    boolean press = false;
+
 
     Pose holdPoint = new Pose(0,0,0);
     ElapsedTime liftTimer = new ElapsedTime();
@@ -60,6 +62,7 @@ public class TeleOperate extends OpMode {
 
     @Override
     public void loop() {
+
         if (gamepad2.back && gamepad2.x){
             allianceColor = Intake.SampleColor.BLUE;
             opponentColor = Intake.SampleColor.RED;

@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-
+// not going to requested state
 @Config
 public class Lift {
     public DcMotorEx liftMotorR, liftMotorL, liftMotor3;

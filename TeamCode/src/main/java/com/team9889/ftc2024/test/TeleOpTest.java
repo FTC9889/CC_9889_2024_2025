@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.team9889.ftc2024.subsystems.Robot;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -91,6 +92,9 @@ public class TeleOpTest extends LinearOpMode {
                 mRobot.mFlag.setFlagPosition(flagPosition);
             }
 
+            mRobot.mLift.setHangMotorPower(gamepad2.left_stick_y);
+            mRobot.mLift.liftMotor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
             telemetry.addData("CurrentLiftPosition", mRobot.mLift.currentLiftPosition());
             telemetry.addData("CurrentIntakePosition", mRobot.mIntake.extension.getCurrentPosition());
@@ -98,6 +102,8 @@ public class TeleOpTest extends LinearOpMode {
 
             telemetry.addData("LiftMagnetState", mRobot.mLift.liftMagnetSensor.getState());
             telemetry.addData("ColorSensorDistance", mRobot.mIntake.colorSensor.getDistance(DistanceUnit.INCH));
+
+            telemetry.addData("HangMotorPosition", mRobot.mLift.liftMotor3.getCurrentPosition());
 
             String text = "";
             if (mRobot.mIntake.colorSensor.getDistance(DistanceUnit.INCH) < 1.5){

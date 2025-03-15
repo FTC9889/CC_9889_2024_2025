@@ -28,7 +28,7 @@ public class Lift {
 //            shift1, shift2;
     public DigitalChannel liftMagnetSensor;
 
-    public static double lift_kp = 0.027;
+    public static double lift_kp = 0.025;
     public static double lift_kd = 0.02;
     double integralSum = 0;
     public static double lift_ki =  0.01;
@@ -110,15 +110,15 @@ public class Lift {
         NULL(0),
         INTAKE_POSITION(0),
         DEFAULT_POSITION(0),
-        LOW_RUNG_POSITION(169),
-        HIGH_RUNG_POSITION(680),
-        HIGH_RUNG_RELEASED_POSITION(455),
-        HIGH_RUNG_SCORE_POSITION(455),
-        LOW_BASKET_POSITION(605),
-        HIGH_BASKET_POSITION(1380),
-        HUMAN_PLAYER_POSITION(43),
-        HUMAN_PLAYER_POSITION_2(71),
-        LEVEL_ONE_ASSENT_POSITION(468),
+        LOW_RUNG_POSITION(161),
+        HIGH_RUNG_POSITION(647),
+        HIGH_RUNG_RELEASED_POSITION(433),
+        HIGH_RUNG_SCORE_POSITION(433),
+        LOW_BASKET_POSITION(576),
+        HIGH_BASKET_POSITION(1313),
+        HUMAN_PLAYER_POSITION(41),
+        HUMAN_PLAYER_POSITION_2(68),
+        LEVEL_ONE_ASSENT_POSITION(445),
         TRANSFER_POSITION(0);
 
         private final int value;

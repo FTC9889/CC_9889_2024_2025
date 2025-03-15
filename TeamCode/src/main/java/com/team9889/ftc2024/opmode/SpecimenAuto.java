@@ -97,7 +97,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 5
                         new BezierLine(
                                 new Point(55.564, 15.020, Point.CARTESIAN),
-                                new Point(10.5, 19.020, Point.CARTESIAN)
+                                new Point(9, 19.020, Point.CARTESIAN)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -108,8 +108,8 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(10.5, 17.020, Point.CARTESIAN),
-                                new Point(38.5, 68.000, Point.CARTESIAN)
+                                new Point(9, 17.020, Point.CARTESIAN),
+                                new Point(38, 68.000, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(360), Math.toRadians(180))
@@ -131,7 +131,7 @@ public class SpecimenAuto extends OpMode {
                         // Line 12
                         new BezierLine(
                                 new Point(14, 35.900, Point.CARTESIAN),
-                                new Point(10.5, 35.900, Point.CARTESIAN)
+                                new Point(9, 35.900, Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
@@ -141,7 +141,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 10
                         new BezierLine(
-                                new Point(10.5, 35.900, Point.CARTESIAN),
+                                new Point(9, 35.900, Point.CARTESIAN),
                                 new Point(38, 69.000, Point.CARTESIAN)
                         )
                 )
@@ -152,7 +152,7 @@ public class SpecimenAuto extends OpMode {
                 .addPath(
                         // Line 13
                         new BezierLine(
-                                new Point(10.5, 35.900, Point.CARTESIAN),
+                                new Point(9, 35.900, Point.CARTESIAN),
                                 new Point(38, 70.00, Point.CARTESIAN)
                         )
                 )

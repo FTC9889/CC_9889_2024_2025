@@ -104,18 +104,22 @@ public class TeleOperate extends OpMode {
 
         // Hang Controls
         mRobot.mLift.liftMotor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        mRobot.mLift.setHangMotorPower(-gamepad2.left_stick_y);
+        if (gamepad1.dpad_up){
+            mRobot.mLift.setHangMotorPower(-1);
+        } else if (gamepad1.dpad_down) {
+            mRobot.mLift.setHangMotorPower(1);
+        } else {
+            mRobot.mLift.setHangMotorPower(0);
+        }
 
         // Flag Controls
-        if (gamepad1.dpad_up){ // Endgame Hack
-            mRobot.mFlag.setFlagPosition(0.55);
-        }else { // Normal Flag Control (Show auto reject)
-            if (!yellow) {
-                mRobot.mFlag.setFlagPosition(0.85);
-            } else {
-                mRobot.mFlag.setFlagPosition(0.9);
-            }
+         // Normal Flag Control (Show auto reject)
+        if (!yellow) {
+            mRobot.mFlag.setFlagPosition(0.85);
+        } else {
+            mRobot.mFlag.setFlagPosition(0.9);
         }
+
 
         // Check if we are in intaking
         if (mRobot.mIntake.getCurrentIntakeState() == Intake.IntakeState.INTAKE) {

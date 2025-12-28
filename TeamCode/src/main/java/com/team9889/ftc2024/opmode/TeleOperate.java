@@ -104,7 +104,7 @@ public class TeleOperate extends OpMode {
 
         // Hang Controls
         mRobot.mLift.liftMotor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        if (gamepad1.dpad_up){
+        if (gamepad2.dpad_right){
             mRobot.mLift.setHangMotorPower(-1);
         } else if (gamepad1.dpad_down) {
             mRobot.mLift.setHangMotorPower(1);

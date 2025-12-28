@@ -39,7 +39,7 @@ public class BasketAuto extends OpMode {
 
     private final Pose startPose = new Pose(7.84, 103.45, Math.toRadians(-90));
 
-    private final Pose scorePoint = new Pose(15, 128, Math.toRadians(-45));
+    private final Pose scorePoint = new Pose(14, 128, Math.toRadians(-45));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private PathChain scorePreload;
@@ -53,7 +53,7 @@ public class BasketAuto extends OpMode {
                 .addPath(
                         new BezierCurve(
                                 new Point(startPose.getX(), startPose.getY(), Point.CARTESIAN),
-                                new Point(16, 128, Point.CARTESIAN)
+                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN)
                         )
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(-90), Math.toRadians(-45))
@@ -64,7 +64,7 @@ public class BasketAuto extends OpMode {
                 .addPath(
                         // Line 2
                         new BezierLine(
-                                new Point(14, 130, Point.CARTESIAN),
+                                new Point(scorePoint.getX(), scorePoint.getY(), Point.CARTESIAN),
                                 new Point(34, 120.81, Point.CARTESIAN)
                         )
                 )
@@ -450,7 +450,7 @@ public class BasketAuto extends OpMode {
         mRobot.mLift.setWristPosition(Lift.WristState.DEFAULT_POSITION.getTargetPosition());
         mRobot.mLift.setElbowPosition(Lift.ElbowStates.DEFAULT_POSITION.getTargetPosition());
 
-        mRobot.mFlag.setFlagPosition(0.9);
+        mRobot.mFlag.setFlagPosition(0.85);
     }
 
     /** This method is called continuously after Init while waiting for "play". **/
